@@ -4,7 +4,7 @@ import * as vsc from "vscode";
 import * as path from "path";
 
 import { SeedEnvironmentConfig } from "./config";
-
+import { StatusBar } from "./models/statusBar";
 
 
 // this method is called when extension is activated
@@ -16,6 +16,16 @@ export function activate(context: vsc.ExtensionContext): any {
     SeedEnvironmentConfig.initialize().then((result: boolean) => {
         let log: string = "angular-typescript-extension is " + (result ?  "activated" : "deactivated (not exists project)");
         console.log(log);
+
+        // activate extension
+        if (result) {
+            // create statusbar
+            let statusBar: StatusBar = new StatusBar();
+
+            // Add to a list of disposables which are disposed when this extension is deactivated.
+            context.subscriptions.push(statusBar);
+        }
+
     });
 
 }

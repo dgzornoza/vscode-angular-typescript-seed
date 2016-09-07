@@ -10,9 +10,8 @@ const MAIN_APP_REGEXP: RegExp = /[\s\S]*class AngularApp[\s\S]*\.controllersBase
  */
 export class SeedEnvironmentConfig {
 
-    /** Base path for angular-typescript-seed views */
+    private static _isValidProject: boolean;
     private static _viewsBasePath: string;
-    /** Base path for angular-typescript-seed controllers */
     private static _controllersBasePath: string;
 
 
@@ -52,12 +51,20 @@ export class SeedEnvironmentConfig {
         });
     }
 
+    /** Property for get if exists angular-typescript-seed project */
+    public static get IsValidProject(): boolean {
+        return SeedEnvironmentConfig._isValidProject;
+    }
+    /** Base path for angular-typescript-seed views */
     public static get ViewBasePath(): string {
         return SeedEnvironmentConfig._viewsBasePath;
     }
+    /** Base path for angular-typescript-seed controllers */
     public static get ControllersBasePath(): string {
         return SeedEnvironmentConfig._controllersBasePath;
     }
+
+
 
     private static configureFromfile(uri: vsc.Uri): Promise<boolean> {
 
