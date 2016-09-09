@@ -22,7 +22,6 @@ export function activate(context: vsc.ExtensionContext): any {
         if (result) {
             InversifyConfig.initialize(context);
             let a = InversifyConfig.Kernel.get<IStatusBar>("IStatusBar");
-            let b = 5 / 1;
         }
 
     });

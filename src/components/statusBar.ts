@@ -1,10 +1,14 @@
 import * as vsc from "vscode";
+import { injectable, inject } from "inversify";
+import "reflect-metadata";
+
 import { IDisposable } from "./../models/interfaces/common";
 
 export interface IStatusBar extends IDisposable {
 
 }
 
+@injectable()
 export class StatusBar implements IStatusBar  {
 
     private _statusBarChangeViewController: vsc.StatusBarItem;
