@@ -40,24 +40,24 @@ export class StatusBar implements IStatusBar  {
         this._disposable.dispose();
     }
 
-    private _onDidChangeActiveTextEditor(): void {
+    // private _onDidChangeActiveTextEditor(): void {
 
-        // Get the current text editor
-        let editor: vsc.TextEditor = vsc.window.activeTextEditor;
-        if (!editor) {
-            this._statusBarChangeViewController.hide();
-            return;
-        }
+    //     // Get the current text editor
+    //     let editor: vsc.TextEditor = vsc.window.activeTextEditor;
+    //     if (!editor) {
+    //         this._statusBarChangeViewController.hide();
+    //         return;
+    //     }
 
-        let doc: vsc.TextDocument = editor.document;
+    //     let doc: vsc.TextDocument = editor.document;
 
-        // Only update status if an typescript/html file
-        if (doc.languageId === "typescript" || doc.languageId === "html") {
-            this._statusBarChangeViewController.show();
-        } else {
-            this._statusBarChangeViewController.hide();
-        }
+    //     // Only update status if an typescript/html file
+    //     if (doc.languageId === "typescript" || doc.languageId === "html") {
+    //         this._statusBarChangeViewController.show();
+    //     } else {
+    //         this._statusBarChangeViewController.hide();
+    //     }
 
-    }
+    // }
 
 }

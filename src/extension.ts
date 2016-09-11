@@ -20,8 +20,9 @@ export function activate(context: vsc.ExtensionContext): any {
 
         // activate extension with IOC container
         if (result) {
+
             InversifyConfig.initialize(context);
-            let a = InversifyConfig.Kernel.get<IStatusBar>("IStatusBar");
+            InversifyConfig.Kernel.get<IStatusBar>("IStatusBar");
         }
 
     });
