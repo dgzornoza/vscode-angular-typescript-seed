@@ -1,8 +1,12 @@
+import { injectable } from "inversify";
+import { IDisposable } from "./../models/interfaces/common";
+
 
 /**
  * interface for implement commands
  */
-export abstract class ICommand<TParams> {
+@injectable()
+export abstract class ICommand<TParams> implements IDisposable {
 
     protected _isEnabled: boolean;
 
@@ -19,4 +23,6 @@ export abstract class ICommand<TParams> {
 
     public isEnabled(): boolean { return this._isEnabled; }
 
+    public abstract getCommandName(): string;
+    public abstract dispose(): void;
 }

@@ -10,11 +10,29 @@
     "categories": [
         "Other"
     ],
+    "main": "./out/src/extension",
+    
     "activationEvents": [
+        "onCommand:atse.changeViewController",
         "onLanguage:typescript",
         "onLanguage:html"
     ],
-    "main": "./out/src/extension",
+
+    "contributes": {
+        "keybindings": [
+            {
+                "command": "atse.changeViewController",
+                "key": "ctrl+c ctrl+v",
+                "when": "editorTextFocus"
+            }
+        ],
+        "commands": [
+            {
+                "command": "atse.changeViewController",
+                "title": "Angular-Typescript-Seed: Change view/controller"
+            }
+        ]
+    },
 
     "scripts": {
         "vscode:prepublish": "node ./node_modules/vscode/bin/compile",

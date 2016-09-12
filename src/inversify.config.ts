@@ -1,7 +1,8 @@
 import * as vsc from "vscode";
 import { Kernel } from "inversify";
 import { IDisposable } from "./models/interfaces/common";
-import { StatusBar, IStatusBar } from  "./components/statusBar";
+import { IStatusBar, StatusBar, StatusBarChangeViewItem } from "./components/statusBar";
+import { ChangeViewControllerCmd } from "./commands/changeViewControllerCmd";
 
 /** Class for configure IOC + DI from inversify library
  * https://github.com/inversify/InversifyJS
@@ -18,7 +19,12 @@ export class InversifyConfig {
 
         // define IOC
         InversifyConfig._kernel.bind<IStatusBar>("IStatusBar").to(StatusBar).inSingletonScope().onActivation(InversifyConfig._subscribe);
+        InversifyConfig._kernel.bind<StatusBarChangeViewItem>("StatusBarChangeViewItem")
+            .to(StatusBarChangeViewItem).inSingletonScope().onActivation(InversifyConfig._subscribe);
 
+        // Commands
+        InversifyConfig._kernel.bind<ChangeViewControllerCmd>("ChangeViewControllerCmd")
+            .to(ChangeViewControllerCmd).inSingletonScope().onActivation(InversifyConfig._subscribe);
 
     }
 
