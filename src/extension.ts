@@ -1,10 +1,11 @@
 // The MIT License (MIT)
 // Copyright (c) 2016 David González Zornoza
 import * as vsc from "vscode";
-import * as path from "path";
 
 import { SeedEnvironmentConfig } from "./config";
-import { StatusBar } from "./models/statusBar";
+import { InversifyConfig } from "./inversify.config";
+import { IStatusBar } from "./components/statusBar";
+
 
 
 // this method is called when extension is activated
@@ -17,13 +18,11 @@ export function activate(context: vsc.ExtensionContext): any {
         let log: string = "angular-typescript-extension is " + (result ?  "activated" : "deactivated (not exists project)");
         console.log(log);
 
-        // activate extension
+        // activate extension with IOC container
         if (result) {
-            // create statusbar
-            let statusBar: StatusBar = new StatusBar();
 
-            // Add to a list of disposables which are disposed when this extension is deactivated.
-            context.subscriptions.push(statusBar);
+            InversifyConfig.initialize(context);
+            InversifyConfig.Kernel.get<IStatusBar>("IStatusBar");
         }
 
     });

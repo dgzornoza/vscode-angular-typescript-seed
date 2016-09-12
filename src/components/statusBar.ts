@@ -1,6 +1,15 @@
 import * as vsc from "vscode";
+import { injectable } from "inversify";
+import "reflect-metadata";
 
-export class StatusBar {
+import { IDisposable } from "./../models/interfaces/common";
+
+export interface IStatusBar extends IDisposable {
+
+}
+
+@injectable()
+export class StatusBar implements IStatusBar  {
 
     private _statusBarChangeViewController: vsc.StatusBarItem;
     private _disposable:  vsc.Disposable;
@@ -26,29 +35,29 @@ export class StatusBar {
         this._disposable = vsc.Disposable.from(...subscriptions);
     }
 
-    public dispose() {
+    public dispose(): void {
         this._statusBarChangeViewController.dispose();
         this._disposable.dispose();
     }
 
-    private _onDidChangeActiveTextEditor() {
+    // private _onDidChangeActiveTextEditor(): void {
 
-        // Get the current text editor
-        let editor: vsc.TextEditor = vsc.window.activeTextEditor;
-        if (!editor) {
-            this._statusBarChangeViewController.hide();
-            return;
-        }
+    //     // Get the current text editor
+    //     let editor: vsc.TextEditor = vsc.window.activeTextEditor;
+    //     if (!editor) {
+    //         this._statusBarChangeViewController.hide();
+    //         return;
+    //     }
 
-        let doc: vsc.TextDocument = editor.document;
+    //     let doc: vsc.TextDocument = editor.document;
 
-        // Only update status if an typescript/html file
-        if (doc.languageId === "typescript" || doc.languageId === "html") {
-            this._statusBarChangeViewController.show();
-        } else {
-            this._statusBarChangeViewController.hide();
-        }
+    //     // Only update status if an typescript/html file
+    //     if (doc.languageId === "typescript" || doc.languageId === "html") {
+    //         this._statusBarChangeViewController.show();
+    //     } else {
+    //         this._statusBarChangeViewController.hide();
+    //     }
 
-    }
+    // }
 
 }

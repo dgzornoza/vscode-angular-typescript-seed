@@ -6,7 +6,7 @@ const MAIN_APP_REGEXP: RegExp = /[\s\S]*class AngularApp[\s\S]*\.controllersBase
 
 
 /**
- * Clas for store angular-typescript-seed envoronment vars
+ * Clas with angular-typescript-seed environment vars
  */
 export class SeedEnvironmentConfig {
 
