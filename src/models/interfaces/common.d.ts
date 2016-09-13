@@ -6,6 +6,4 @@ export interface IReject {
     (reason?: any): void;
 }
 
-export interface IDisposable {
-    dispose(): void;
-}
+

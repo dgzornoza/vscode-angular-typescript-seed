@@ -5,7 +5,7 @@ import * as vsc from "vscode";
 import { SeedEnvironmentConfig } from "./config";
 import { InversifyConfig } from "./inversify.config";
 import { IStatusBar } from "./components/statusBar";
-
+import { ProvidersManager } from "./providers/providersManager";
 
 
 // this method is called when extension is activated
@@ -23,6 +23,7 @@ export function activate(context: vsc.ExtensionContext): any {
 
             InversifyConfig.initialize(context);
             InversifyConfig.Kernel.get<IStatusBar>("IStatusBar");
+            InversifyConfig.Kernel.get<ProvidersManager>("ProvidersManager");
         }
 
     });

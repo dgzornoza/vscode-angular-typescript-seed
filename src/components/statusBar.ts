@@ -2,7 +2,7 @@ import * as vsc from "vscode";
 import { injectable, inject } from "inversify";
 import "reflect-metadata";
 
-import { IDisposable } from "./../models/interfaces/common";
+import { Disposable } from "./../models/disposable";
 import { ChangeViewControllerCmd } from "./../commands/changeViewControllerCmd";
 
 
@@ -10,24 +10,11 @@ import { ChangeViewControllerCmd } from "./../commands/changeViewControllerCmd";
 // StatusBar items
 // --------------------------------------------
 
-/** Clase base for inherit statusbar items
- * @remarks should be call base dispose in dispose method
- */
-@injectable()
-abstract class IStatusBarItem implements IDisposable {
-
-    protected _statusBarItem: vsc.StatusBarItem;
-    protected _disposable:  vsc.Disposable;
-
-    public dispose(): void {
-        this._statusBarItem.dispose();
-        this._disposable.dispose();
-    }
-}
 
 @injectable()
-export class StatusBarChangeViewItem extends IStatusBarItem {
+export class StatusBarChangeViewItem extends Disposable {
 
+    private _statusBarItem: vsc.StatusBarItem;
     private _changeViewControllerCmd: ChangeViewControllerCmd;
 
     constructor(@inject("ChangeViewControllerCmd") changeViewControllerCmd: ChangeViewControllerCmd) {
@@ -41,11 +28,7 @@ export class StatusBarChangeViewItem extends IStatusBarItem {
         }
 
         // subscribe to events
-        let subscriptions: vsc.Disposable[] = [];
-        vsc.window.onDidChangeActiveTextEditor(this._onDidChangeActiveTextEditor, this, subscriptions);
-
-        // create a combined disposable from event subscriptions
-        this._disposable = vsc.Disposable.from(...subscriptions);
+        vsc.window.onDidChangeActiveTextEditor(this._onDidChangeActiveTextEditor, this, this._subscriptions);
     }
 
     public dispose(): void {
@@ -80,21 +63,22 @@ export class StatusBarChangeViewItem extends IStatusBarItem {
 // --------------------------------------------
 
 
-export interface IStatusBar extends IDisposable {
+export interface IStatusBar {
     StatusBarChangeViewItem: StatusBarChangeViewItem;
 }
 
 @injectable()
-export class StatusBar implements IStatusBar  {
+export class StatusBar extends Disposable implements IStatusBar  {
 
     private _statusBarChangeViewItem: StatusBarChangeViewItem;
 
     constructor(@inject("StatusBarChangeViewItem") statusBarChangeViewItem: StatusBarChangeViewItem) {
+        super();
         this._statusBarChangeViewItem = statusBarChangeViewItem;
     }
 
     public dispose(): void {
-        // not used
+        super.dispose();
     }
 
     public get StatusBarChangeViewItem(): StatusBarChangeViewItem {
