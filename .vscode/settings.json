@@ -1,5 +1,6 @@
 // Place your settings in this file to overwrite default and user settings.
 {
+    // Vscode configuration
     "files.exclude": {
         "out": true, // set this to true to hide the "out" folder with the compiled JS files
         "node_modules": true,
@@ -9,5 +10,14 @@
         "out": true // set this to false to include "out" folder in search results
     },
     "typescript.tsdk": "./node_modules/typescript/lib", // we want to use the TS server from our node_modules folder to control its version
-    "editor.rulers": [160] 
+    "editor.rulers": [160],
+
+
+    // Auto Import configuration
+
+    // Specifies wether to use double quotes
+    "autoimport.doubleQuotes": true,
+
+    // Specifies wether to use spaces between first and last brace
+    "autoimport.spaceBetweenBraces": true
 }
