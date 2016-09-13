@@ -22,7 +22,7 @@
         "keybindings": [
             {
                 "command": "atse.changeViewController",
-                "key": "ctrl+c ctrl+v",
+                "key": "ctrl+shift+0",
                 "when": "editorTextFocus"
             }
         ],
