@@ -4,7 +4,7 @@ import * as vsc from "vscode";
 
 import { SeedEnvironmentConfig } from "./config";
 import { InversifyConfig } from "./inversify.config";
-import { IStatusBar } from "./components/statusBar";
+import { IStatusBar } from "./components/statusBar.component";
 import { ProvidersManager } from "./providers/providersManager";
 
 
@@ -13,7 +13,7 @@ import { ProvidersManager } from "./providers/providersManager";
 export function activate(context: vsc.ExtensionContext): any {
     "use strict";
 
-    // initialize angular-typescript-seed-extension only if is based in angular-typescript-seed project 
+    // initialize angular-typescript-seed-extension only if is based in angular-typescript-seed project
     SeedEnvironmentConfig.initialize().then((result: boolean) => {
         let log: string = "angular-typescript-extension is " + (result ?  "activated" : "deactivated (not exists project)");
         console.log(log);

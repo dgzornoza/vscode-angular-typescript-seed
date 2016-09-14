@@ -3,7 +3,7 @@ import { injectable, inject } from "inversify";
 import "reflect-metadata";
 
 import { Disposable } from "./../models/disposable";
-import { ChangeViewControllerCmd } from "./../commands/changeViewControllerCmd";
+import { ChangeViewControllerCmd } from "./../commands/changeViewController.cmd";
 
 
 // --------------------------------------------

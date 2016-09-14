@@ -3,7 +3,7 @@ import { injectable, inject } from "inversify";
 import "reflect-metadata";
 
 import { Disposable } from "./../models/disposable";
-import { HtmlTypescriptCompletionItemProvider } from "./htmlTypescriptCompletionItemProvider";
+import { HtmlTypescriptCompletionItemProvider } from "./htmlTypescriptCompletionItem.provider";
 
 
 
@@ -23,7 +23,7 @@ export class ProvidersManager extends Disposable implements IProvidersManager  {
         // store providers
         this._htmlTypescriptCompletionItemProvider = htmlTypescriptCompletionItemProvider;
 
-        // subscribe providers        
+        // subscribe providers
         this._subscriptions.push(vsc.languages.registerCompletionItemProvider(this._htmlTypescriptCompletionItemProvider.getProviderDocumentSelector(),
             this._htmlTypescriptCompletionItemProvider,
             ...this._htmlTypescriptCompletionItemProvider.getProviderTriggerCharacters()));

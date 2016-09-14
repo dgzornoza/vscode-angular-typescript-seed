@@ -1,6 +1,6 @@
 import * as vsc from "vscode";
 import { injectable } from "inversify";
-
+import "reflect-metadata";
 
 export interface IDisposable {
     dispose(): void;

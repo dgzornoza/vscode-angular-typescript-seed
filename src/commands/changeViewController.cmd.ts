@@ -1,44 +1,43 @@
 import * as vsc from "vscode";
-import { injectable } from "inversify";
+import * as path from "path";
+import { injectable, inject } from "inversify";
 import "reflect-metadata";
 
 import { ICommand } from "./../models/command";
-import { SeedEnvironmentConfig } from "./../config";
+import { ViewsControllersService } from "./../services/viewController.service";
 
 const COMMAND_NAME: string = "atse.changeViewController";
 
 @injectable()
 export class ChangeViewControllerCmd extends ICommand<any> {
 
-    constructor() {
+    private _viewsControllersService: ViewsControllersService;
+
+    constructor(@inject("ViewsControllersService") viewsControllersService: ViewsControllersService) {
         super();
         vsc.commands.registerCommand(COMMAND_NAME, this.execute);
     }
 
     public execute(...params: any[]): void {
 
-        // set all paths with slash '/' for replace
-        let slashRegex: RegExp = /\\/g;
-        let docFileName: string = vsc.window.activeTextEditor.document.fileName.replace(slashRegex, "/");
+        let normalizedActiveEditorPath: string = path.normalize(vsc.window.activeTextEditor.document.fileName);
 
         // get view/controller path to open
-        let path: string;
+        let resolvedPath: string;
         switch (vsc.window.activeTextEditor.document.languageId) {
             case "typescript":
-                path = docFileName.replace(SeedEnvironmentConfig.ControllersBasePath, SeedEnvironmentConfig.ViewBasePath);
-                path = path.replace(".controller.ts", ".html");
+                resolvedPath = this._viewsControllersService.getViewFromControllerPath(vsc.window.activeTextEditor.document.fileName);
                 break;
             case "html":
-                path = docFileName.replace(SeedEnvironmentConfig.ViewBasePath, SeedEnvironmentConfig.ControllersBasePath);
-                path = path.replace(".html", ".controller.ts");
+                resolvedPath = this._viewsControllersService.getControllerFromViewPath(vsc.window.activeTextEditor.document.fileName);
                 break;
 
             default: ;
         }
 
-        if (path !== docFileName) {
+        if (resolvedPath !== normalizedActiveEditorPath) {
 
-            vsc.workspace.openTextDocument(path)
+            vsc.workspace.openTextDocument(resolvedPath)
                 .then((opened: vsc.TextDocument) => vsc.window.showTextDocument(opened),
                 (reason: any) => {
                     console.log(reason);

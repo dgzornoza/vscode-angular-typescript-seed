@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
 import { Disposable } from "./../models/disposable";
-
+import "reflect-metadata";
 
 /**
  * interface for implement commands

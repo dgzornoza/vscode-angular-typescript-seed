@@ -1,9 +1,10 @@
+import { ViewsControllersService } from "./services/viewController.service";
 import * as vsc from "vscode";
 import { Kernel } from "inversify";
-import { IDisposable } from "./models/interfaces/common";
-import { IStatusBar, StatusBar, StatusBarChangeViewItem } from "./components/statusBar";
-import { ChangeViewControllerCmd } from "./commands/changeViewControllerCmd";
-import { HtmlTypescriptCompletionItemProvider } from "./providers/htmlTypescriptCompletionItemProvider";
+import { IDisposable } from "./models/disposable";
+import { IStatusBar, StatusBar, StatusBarChangeViewItem } from "./components/statusBar.component";
+import { ChangeViewControllerCmd } from "./commands/changeViewController.cmd";
+import { HtmlTypescriptCompletionItemProvider } from "./providers/htmlTypescriptCompletionItem.provider";
 import { ProvidersManager } from "./providers/providersManager";
 
 /** Class for configure IOC + DI from inversify library
@@ -35,6 +36,10 @@ export class InversifyConfig {
 
         InversifyConfig._kernel.bind<HtmlTypescriptCompletionItemProvider>("HtmlTypescriptCompletionItemProvider")
             .to(HtmlTypescriptCompletionItemProvider).inSingletonScope().onActivation(InversifyConfig._subscribe);
+
+        // Services
+        InversifyConfig._kernel.bind<ViewsControllersService>("ViewsControllersService")
+            .to(ViewsControllersService).inSingletonScope().onActivation(InversifyConfig._subscribe);
 
     }
 
