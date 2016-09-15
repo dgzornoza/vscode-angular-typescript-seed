@@ -80,7 +80,7 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
             let normalizedActiveEditorPath: string = path.normalize(vsc.window.activeTextEditor.document.fileName);
             let resolvedPath: string = this._viewsControllersService.getControllerFromViewPath(vsc.window.activeTextEditor.document.fileName);
 
-            this._typescriptLanguageService.generateDocumentation([resolvedPath], {})
+            this._typescriptLanguageService.generateDocumentation([resolvedPath], "", {});
         }
     }
 }

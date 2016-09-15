@@ -4,7 +4,7 @@ import { injectable } from "inversify";
 import "reflect-metadata";
 
 import { Disposable } from "./../models/disposable";
-import { ITypescriptDocumentEntry } from "./../models/interfaces/typescriptLanguage";
+import { ITypescriptClassEntry, ITypescriptSimbolEntry, ITypescriptSignatureEntry } from "./../models/interfaces/typescriptLanguage";
 
 /**
  * service for manage abstract syntax tree (AST) typescript language
@@ -13,16 +13,16 @@ import { ITypescriptDocumentEntry } from "./../models/interfaces/typescriptLangu
 export class TypescriptLanguageService extends Disposable {
 
     private _tempTypeChecker: ts.TypeChecker;
-    private _tempResult: ITypescriptDocumentEntry[];
+    private _tempResult: ITypescriptClassEntry[];
 
     constructor() {
         super();
     }
 
 
-    /** Generate documention for all classes in a set of .ts files
-     * @param fileNames typescript files for generate documention
-     * @param outputFileName output path + filename documention
+    /** Generate documentation for all classes in a set of .ts files
+     * @param fileNames typescript files for generate documentation
+     * @param outputFileName output path + filename documentation
      * @options typescript options
      */
     public generateDocumentation(fileNames: string[], outputFileName: string, options: ts.CompilerOptions): void {
@@ -70,8 +70,8 @@ export class TypescriptLanguageService extends Disposable {
 
 
     /** Serialize a class symbol infomration */
-    private _serializeClass(symbol: ts.Symbol): ITypescriptDocumentEntry {
-        let details: ITypescriptDocumentEntry = this._serializeSymbol(symbol);
+    private _serializeClass(symbol: ts.Symbol): ITypescriptClassEntry {
+        let details: ITypescriptClassEntry = this._serializeSymbol(symbol);
 
         // Get the construct signatures
         let constructorType: ts.Type = this._tempTypeChecker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
@@ -80,7 +80,7 @@ export class TypescriptLanguageService extends Disposable {
     }
 
     /** Serialize a signature (call or construct) */
-    private _serializeSignature(signature: ts.Signature): ITypescriptDocumentEntry {
+    private _serializeSignature(signature: ts.Signature): ITypescriptSignatureEntry {
         return {
             documentation: ts.displayPartsToString(signature.getDocumentationComment()),
             parameters: signature.parameters.map((symbol: ts.Symbol) => { return this._serializeSymbol(symbol); }),
@@ -89,7 +89,7 @@ export class TypescriptLanguageService extends Disposable {
     }
 
     /** Serialize a symbol into a json object */
-    private _serializeSymbol(symbol: ts.Symbol): ITypescriptDocumentEntry {
+    private _serializeSymbol(symbol: ts.Symbol): ITypescriptSimbolEntry {
         return {
             documentation: ts.displayPartsToString(symbol.getDocumentationComment()),
             name: symbol.getName(),

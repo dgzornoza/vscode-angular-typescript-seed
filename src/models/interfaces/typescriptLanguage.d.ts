@@ -1,11 +1,27 @@
-
-/** Interface with typescript document entry */
-export interface ITypescriptDocumentEntry {
-    constructors?: ITypescriptDocumentEntry[];
+/** Interface base for typescript entry */
+export interface ITypescriptEntry {
     documentation?: string;
-    fileName?: string;
     name?: string;
-    parameters?: ITypescriptDocumentEntry[];
-    returnType?: string;
+}
+
+/** Interface for typescript simbol entry */
+export interface ITypescriptSimbolEntry extends ITypescriptEntry {
     type?: string;
 }
+
+/** Interface for typescript signature entry (call, constructor, property) */
+export interface ITypescriptSignatureEntry extends ITypescriptEntry {
+    parameters?: ITypescriptSimbolEntry[];
+    returnType?: string;
+}
+
+/** Interface with typescript document entry */
+export interface ITypescriptClassEntry extends ITypescriptSimbolEntry {
+    constructors?: ITypescriptSignatureEntry[];
+    methods?: ITypescriptSignatureEntry[];
+    properties?: ITypescriptSignatureEntry[];
+}
+
+
+
+
