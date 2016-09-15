@@ -5,7 +5,8 @@ import { IResolve, IReject } from "./models/interfaces/common";
 import { IKeyValueMap } from "./models/interfaces/common";
 
 const MAIN_APP_REGEXP: RegExp = /[\s\S]*class AngularApp[\s\S]*\.controllersBasePath\s*=\s*"(.*)";[\s\S]*.viewsBasePath\s*=\s*"(.*)";[\s\S]*/;
-const ROUTES_REGEXP: RegExp = /((controllerAs)\s*:\s*"((\\"|[^"])*)")|((path)\s*:\s*"((\\"|[^"])*)")/g;
+const ROUTES_ALIAS_REGEXP: RegExp =
+    /controllerAs\s*:\s*"((\\"|[^"])*)".*path\s*:\s*"((\\"|[^"])*)"|path\s*:\s*"((\\"|[^"])*)".*controllerAs\s*:\s*"((\\"|[^"])*)"/g;
 
 /**
  * Clas with angular-typescript-seed environment vars
@@ -15,7 +16,7 @@ export class SeedEnvironmentConfig {
     private static _isValidProject: boolean;
     private static _viewsBasePath: string;
     private static _controllersBasePath: string;
-    private static _routes: IKeyValueMap<string>[];
+    private static _routesAlias: IKeyValueMap<string>[];
 
     /** Initialize angular-typescript-seed-extension only if is based in angular-typescript-seed project
      * @return true if can activate extension (only if exists angular-typescript-seed project), false otherwise.
@@ -65,8 +66,8 @@ export class SeedEnvironmentConfig {
     public static get ControllersBasePath(): string {
         return SeedEnvironmentConfig._controllersBasePath;
     }
-    public static get Routes(): IKeyValueMap<string>[] {
-        return SeedEnvironmentConfig._routes;
+    public static get RoutesAlias(): IKeyValueMap<string>[] {
+        return SeedEnvironmentConfig._routesAlias;
     }
 
 
@@ -80,7 +81,7 @@ export class SeedEnvironmentConfig {
                 if (err) { reject(err); }
 
                 let mainAppMatches: RegExpExecArray = MAIN_APP_REGEXP.exec(data);
-                let routesMatches: RegExpExecArray = ROUTES_REGEXP.exec(data);
+                let routesMatches: RegExpExecArray = ROUTES_ALIAS_REGEXP.exec(data);
 
                 // main app file
                 if (mainAppMatches != undefined && mainAppMatches.length === 3) {
@@ -91,16 +92,16 @@ export class SeedEnvironmentConfig {
                 // routes file
                 } else if (routesMatches != undefined) {
 
-                    this._routes = [];
+                    this._routesAlias = [];
 
                     do {
-                        // store routes from regex
-                        this._routes[routesMatches[2] || routesMatches[6]] = routesMatches[3] || routesMatches[3];
+                        // store routes alias from regex
+                        this._routesAlias[routesMatches[3] || routesMatches[5]] = routesMatches[1] || routesMatches[7];
 
-                        if (routesMatches.index === ROUTES_REGEXP.lastIndex) {
-                            ROUTES_REGEXP.lastIndex++;
+                        if (routesMatches.index === ROUTES_ALIAS_REGEXP.lastIndex) {
+                            ROUTES_ALIAS_REGEXP.lastIndex++;
                         }
-                        routesMatches = ROUTES_REGEXP.exec(data);
+                        routesMatches = ROUTES_ALIAS_REGEXP.exec(data);
                     } while (routesMatches)
 
                 // nothing
