@@ -42,7 +42,7 @@ export class TypescriptLanguageService extends Disposable {
         }
 
         // print out the doc
-        fs.writeFileSync(outputFileName, JSON.stringify(this._tempResult, undefined, 4));
+        // fs.writeFileSync(outputFileName, JSON.stringify(this._tempResult, undefined, 4));
     }
 
 
@@ -54,32 +54,55 @@ export class TypescriptLanguageService extends Disposable {
             return;
         }
 
-        if (node.kind === ts.SyntaxKind.ClassDeclaration) {
-            // This is a top level class, get its symbol
-            let symbol: ts.Symbol = this._tempTypeChecker.getSymbolAtLocation((node as ts.ClassDeclaration).name);
-            this._tempResult.push(this._serializeClass(symbol));
-            // No need to walk any further, class expressions/inner declarations
-            // cannot be exported
+        switch (node.kind) {
+            case ts.SyntaxKind.ModuleDeclaration:
 
-        } else if (node.kind === ts.SyntaxKind.ModuleDeclaration) {
-            // This is a namespace, visit its children
-            ts.forEachChild(node, (_node: ts.Node) => { this._visit(_node); });
+                // This is a namespace, visit its children
+                ts.forEachChild(node, (_node: ts.Node) => { this._visit(_node); });
+                break;
+
+            case ts.SyntaxKind.ClassDeclaration:
+
+                // This is a top level class, get its symbol
+                let symbol: ts.Symbol = this._tempTypeChecker.getSymbolAtLocation((node as ts.ClassDeclaration).name);
+                this._tempResult.push(this._serializeClass(symbol));
+                break;
+
+            default:
+                break;
         }
     }
 
 
 
-    /** Serialize a class symbol infomration */
+    /** Serialize a class symbol information */
     private _serializeClass(symbol: ts.Symbol): ITypescriptClassEntry {
+
+        // create class entry
         let details: ITypescriptClassEntry = this._serializeSymbol(symbol);
 
-        // Get the construct signatures
+        // add constructors signatures
         let constructorType: ts.Type = this._tempTypeChecker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
         details.constructors = constructorType.getConstructSignatures().map((signature: ts.Signature) => { return this._serializeSignature(signature); });
+
+        // add methods signatures
+        //let temp: ts.Type = this._tempTypeChecker.(symbol, symbol.valueDeclaration);
+        //details.methods = constructorType.getCallSignatures().map((signature: ts.Signature) => { return this._serializeSignature(signature); });
+
+        let type = this._tempTypeChecker.getTypeAtLocation(symbol.);
+        let props = this._tempTypeChecker.getPropertiesOfType(constructorType);
+        props.forEach(prop => {
+            let resolvedPropertyType = this._tempTypeChecker.getTypeOfSymbolAtLocation(prop, undefined);
+            console.log(resolvedPropertyType);
+        });
+
+        // Get properties signatures
+        // let constructorType: ts.Type = this._tempTypeChecker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
+        // details.properties = constructorType.getConstructSignatures().map((signature: ts.Signature) => { return this._serializeSignature(signature); });
         return details;
     }
 
-    /** Serialize a signature (call or construct) */
+    /** Serialize a signature (call or constrouct) */
     private _serializeSignature(signature: ts.Signature): ITypescriptSignatureEntry {
         return {
             documentation: ts.displayPartsToString(signature.getDocumentationComment()),

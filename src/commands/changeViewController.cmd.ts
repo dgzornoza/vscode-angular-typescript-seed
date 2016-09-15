@@ -15,7 +15,10 @@ export class ChangeViewControllerCmd extends ICommand<any> {
 
     constructor(@inject("ViewsControllersService") viewsControllersService: ViewsControllersService) {
         super();
-        vsc.commands.registerCommand(COMMAND_NAME, this.execute);
+
+        this._viewsControllersService = viewsControllersService;
+
+        this._subscriptions.push(vsc.commands.registerCommand(COMMAND_NAME, () => { this.execute(); }));
     }
 
     public execute(...params: any[]): void {
