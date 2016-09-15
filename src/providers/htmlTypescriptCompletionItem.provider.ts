@@ -1,20 +1,31 @@
 import * as vsc from "vscode";
-import { injectable } from "inversify";
+import * as path from "path";
+import { injectable, inject } from "inversify";
 import "reflect-metadata";
 
-import { SeedEnvironmentConfig } from "./../config";
 import { Disposable } from "./../models/disposable";
+import { ViewsControllersService } from "./../services/viewController.service";
+import { TypescriptLanguageService } from "./../services/typescriptLanguage.service";
 
 
 @injectable()
 export class HtmlTypescriptCompletionItemProvider extends Disposable implements vsc.CompletionItemProvider {
 
-    constructor() {
+    private _viewsControllersService: ViewsControllersService;
+    private _typescriptLanguageService: TypescriptLanguageService;
+
+    constructor(@inject("ViewsControllersService") viewsControllersService: ViewsControllersService,
+                @inject("TypescriptLanguageService") typescriptLanguageService: TypescriptLanguageService) {
         super();
+
+        this._viewsControllersService = viewsControllersService;
+        this._typescriptLanguageService = typescriptLanguageService;
 
         // subscribe to events
         vsc.window.onDidChangeActiveTextEditor(this._onDidChangeActiveTextEditor, this, this._subscriptions);
 
+        // first call to events
+        this._onDidChangeActiveTextEditor();
     }
 
 
@@ -30,7 +41,7 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
     public provideCompletionItems(document: vsc.TextDocument, position: vsc.Position, token: vsc.CancellationToken): vsc.CompletionItem[] |
         Thenable<vsc.CompletionItem[]> | vsc.CompletionList | Thenable<vsc.CompletionList> {
 
-        return new Promise((resolve, reject) => { 
+        return new Promise((resolve, reject) => {
 
             var completionItems:vsc.CompletionItem[] = [];
             var completionItem:vsc.CompletionItem = new vsc.CompletionItem("id");
@@ -63,6 +74,13 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
 
     private _onDidChangeActiveTextEditor(): void {
 
-        
+        // parse typescript controller attached to html file for intellisense
+        if (vsc.window.activeTextEditor.document.languageId === "html") {
+
+            let normalizedActiveEditorPath: string = path.normalize(vsc.window.activeTextEditor.document.fileName);
+            let resolvedPath: string = this._viewsControllersService.getControllerFromViewPath(vsc.window.activeTextEditor.document.fileName);
+
+            this._typescriptLanguageService.generateDocumentation([resolvedPath], {})
+        }
     }
 }

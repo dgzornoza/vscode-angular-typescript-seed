@@ -1,5 +1,6 @@
 import { injectable } from "inversify";
 import "reflect-metadata";
+
 import { Disposable } from "./../models/disposable";
 import { SeedEnvironmentConfig } from "./../config";
 

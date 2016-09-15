@@ -73,8 +73,6 @@ export class SeedEnvironmentConfig {
 
     private static configureFromfile(uri: vsc.Uri): Promise<boolean> {
 
-
-
         return new Promise((resolve: IResolve<boolean>, reject: IReject) => {
 
             fs.readFile(uri.fsPath, "utf8", (err: any, data: string) => {
@@ -103,6 +101,8 @@ export class SeedEnvironmentConfig {
                         }
                         routesMatches = ROUTES_ALIAS_REGEXP.exec(data);
                     } while (routesMatches)
+
+                    return resolve(true);
 
                 // nothing
                 } else {
