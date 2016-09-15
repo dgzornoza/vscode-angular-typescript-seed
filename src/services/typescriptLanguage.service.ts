@@ -96,8 +96,8 @@ export class TypescriptLanguageService extends Disposable {
         //let temp: ts.Type = this._tempTypeChecker.(symbol, symbol.valueDeclaration);
         //details.methods = constructorType.getCallSignatures().map((signature: ts.Signature) => { return this._serializeSignature(signature); });
 
-        let type = this._tempTypeChecker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
-        let props = this._tempTypeChecker.getPropertiesOfType(constructorType);
+        let type = this._tempTypeChecker.getTypeAtLocation(symbol.valueDeclaration);
+        let props = this._tempTypeChecker.getPropertiesOfType(type);
         props.forEach(prop => {
             let resolvedPropertyType = this._tempTypeChecker.getTypeOfSymbolAtLocation(prop, undefined);
             console.log(resolvedPropertyType);
