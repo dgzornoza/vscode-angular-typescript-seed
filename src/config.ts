@@ -72,25 +72,12 @@ export class SeedEnvironmentConfig {
 
     private static configureFromfile(uri: vsc.Uri): Promise<boolean> {
 
-var re = /((controllerAs)\s*:\s*"((\\"|[^"])*)")|((path)\s*:\s*"((\\"|[^"])*)")/g;
-var str = 'import { IRouteResolverProvider } from "app/services/routeResolver.provider";\n\nexport class RoutesConfig {\n\n    /** Function for initialize app routes */\n    public static initialize(routeProvider: ng.route.IRouteProvider, routeResolverProvider: IRouteResolverProvider): void {\n\n        // DEFAULT\n        routeProvider.otherwise({ redirectTo: "/home" });\n\n        // MAIN ROUTES\n        routeProvider.when("/about", routeResolverProvider.resolve({ controllerAs:  "vm", path: "about ff" }));\n        routeProvider.when("/contact", routeResolverProvider.resolve({  path: "contact", controllerAs: "vm" }));\n        routeProvider.when("/contact", routeResolverProvider.resolve({  controllerAs:"asdf", path: "contact", controllerAs: "vm" }));\n        routeProvider.when("/home", routeResolverProvider.resolve({ a: 5,   controllerAs:   "vm", path: "home", e: "sdf" }));\n        routeProvider.when("/users", routeResolverProvider.resolve({ a:  "asdf",controllerAs: "vm", r: "sdf", path: "home", e: "sdf" }));\n\n    }\n}\n(controllerAs|path)\s*:\s*"((\\"|[^"])*)"\n\n(controllerAs|path)":"((\\"|[^"])*)\n\n\n[\s\S]*class RoutesConfig[\s\S]*\.when.*resolve\(.*(controllerAs|path).*\).*\n\nresolve\(.*(controllerAs|path)"*:\s*"((\\"|[^"])*)".*\)\n\n(controllerAs|path)"*:\s*"(([^"])*)"\n\n(controllerAs\s*:\s*"((\\"|[^"])*)")|(path\s*:\s*"((\\"|[^"])*)")';
-var m;
-
-while ((m = re.exec(str)) !== null) {
-    if (m.index === re.lastIndex) {
-        re.lastIndex++;
-    }
-    // View your result using the m-variable.
-    // eg m[0] etc.
-}
-
 
 
         return new Promise((resolve: IResolve<boolean>, reject: IReject) => {
 
             fs.readFile(uri.fsPath, "utf8", (err: any, data: string) => {
                 if (err) { reject(err); }
-
 
                 let mainAppMatches: RegExpExecArray = MAIN_APP_REGEXP.exec(data);
                 let routesMatches: RegExpExecArray = ROUTES_REGEXP.exec(data);
@@ -104,13 +91,17 @@ while ((m = re.exec(str)) !== null) {
                 // routes file
                 } else if (routesMatches != undefined) {
 
-                    while (routesMatches != null) {
-                        // matched text: match[0]
-                        // match start: match.index
-                        // capturing group n: match[n]
-                        routesMatches = ROUTES_REGEXP.exec(data);
-                        }
+                    this._routes = [];
 
+                    do {
+                        // store routes from regex
+                        this._routes[routesMatches[2] || routesMatches[6]] = routesMatches[3] || routesMatches[3];
+
+                        if (routesMatches.index === ROUTES_REGEXP.lastIndex) {
+                            ROUTES_REGEXP.lastIndex++;
+                        }
+                        routesMatches = ROUTES_REGEXP.exec(data);
+                    } while (routesMatches)
 
                 // nothing
                 } else {
