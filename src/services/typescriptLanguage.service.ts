@@ -63,6 +63,13 @@ export class TypescriptLanguageService extends Disposable {
 
             case ts.SyntaxKind.ClassDeclaration:
 
+                let type = this._tempTypeChecker.getTypeAtLocation(node);
+                let props = this._tempTypeChecker.getPropertiesOfType(type);
+                props.forEach(prop => {
+                    let resolvedPropertyType = this._tempTypeChecker.getTypeOfSymbolAtLocation(prop, undefined);
+                    console.log(resolvedPropertyType);
+                });
+
                 // This is a top level class, get its symbol
                 let symbol: ts.Symbol = this._tempTypeChecker.getSymbolAtLocation((node as ts.ClassDeclaration).name);
                 this._tempResult.push(this._serializeClass(symbol));
@@ -89,7 +96,7 @@ export class TypescriptLanguageService extends Disposable {
         //let temp: ts.Type = this._tempTypeChecker.(symbol, symbol.valueDeclaration);
         //details.methods = constructorType.getCallSignatures().map((signature: ts.Signature) => { return this._serializeSignature(signature); });
 
-        let type = this._tempTypeChecker.getTypeAtLocation(symbol.);
+        let type = this._tempTypeChecker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
         let props = this._tempTypeChecker.getPropertiesOfType(constructorType);
         props.forEach(prop => {
             let resolvedPropertyType = this._tempTypeChecker.getTypeOfSymbolAtLocation(prop, undefined);
