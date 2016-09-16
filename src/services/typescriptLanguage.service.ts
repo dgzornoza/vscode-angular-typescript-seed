@@ -12,8 +12,8 @@ import { ITypescriptClassEntry, ITypescriptSimbolEntry, ITypescriptSignatureEntr
 @injectable()
 export class TypescriptLanguageService extends Disposable {
 
-    private _tempTypeChecker: ts.TypeChecker;
-    private _tempResult: ITypescriptClassEntry[];
+    private _typeChecker: ts.TypeChecker;
+    private _result: ITypescriptClassEntry[];
 
     constructor() {
         super();
@@ -31,9 +31,9 @@ export class TypescriptLanguageService extends Disposable {
         let program: ts.Program = ts.createProgram(fileNames, options);
 
         // Get the checker, we will use it to find more about classes
-        this._tempTypeChecker = program.getTypeChecker();
+        this._typeChecker = program.getTypeChecker();
 
-        this._tempResult = [];
+        this._result = [];
 
         // Visit every sourceFile in the program
         for (const sourceFile of program.getSourceFiles()) {
@@ -63,16 +63,9 @@ export class TypescriptLanguageService extends Disposable {
 
             case ts.SyntaxKind.ClassDeclaration:
 
-                let type = this._tempTypeChecker.getTypeAtLocation(node);
-                let props = this._tempTypeChecker.getPropertiesOfType(type);
-                props.forEach(prop => {
-                    let resolvedPropertyType = this._tempTypeChecker.getTypeOfSymbolAtLocation(prop, undefined);
-                    console.log(resolvedPropertyType);
-                });
-
-                // This is a top level class, get its symbol
-                let symbol: ts.Symbol = this._tempTypeChecker.getSymbolAtLocation((node as ts.ClassDeclaration).name);
-                this._tempResult.push(this._serializeClass(symbol));
+                 // This is a top level class, get its symbol
+                let symbol: ts.Symbol = this._typeChecker.getSymbolAtLocation((node as ts.ClassDeclaration).name);
+                this._result.push(this._getClassEntry(symbol));
                 break;
 
             default:
@@ -83,47 +76,45 @@ export class TypescriptLanguageService extends Disposable {
 
 
     /** Serialize a class symbol information */
-    private _serializeClass(symbol: ts.Symbol): ITypescriptClassEntry {
+    private _getClassEntry(symbol: ts.Symbol): ITypescriptClassEntry {
 
         // create class entry
-        let details: ITypescriptClassEntry = this._serializeSymbol(symbol);
+        let details: ITypescriptClassEntry = this._getSymbolEntry(symbol);
 
         // add constructors signatures
-        let constructorType: ts.Type = this._tempTypeChecker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
-        details.constructors = constructorType.getConstructSignatures().map((signature: ts.Signature) => { return this._serializeSignature(signature); });
+        let constructorType: ts.Type = this._typeChecker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
+        details.constructors = constructorType.getConstructSignatures().map((signature: ts.Signature) => { return this._getSignatureEntry(signature); });
 
-        // add methods signatures
-        //let temp: ts.Type = this._tempTypeChecker.(symbol, symbol.valueDeclaration);
-        //details.methods = constructorType.getCallSignatures().map((signature: ts.Signature) => { return this._serializeSignature(signature); });
+        // add members signatures
+        // https://basarat.gitbooks.io/typescript/content/docs/compiler/overview.html
+        let classType: ts.Type = this._typeChecker.getTypeAtLocation(symbol.valueDeclaration);
+        let props: ts.Symbol[] = this._typeChecker.getPropertiesOfType(classType);
+        props.forEach((prop: ts.Symbol) => {
+            let resolvedPropertyType: ts.Type = this._typeChecker.getTypeOfSymbolAtLocation(prop, undefined);
+            let temp: any = resolvedPropertyType.getCallSignatures().map((signature: ts.Signature) => { return this._getSignatureEntry(signature); });
 
-        let type = this._tempTypeChecker.getTypeAtLocation(symbol.valueDeclaration);
-        let props = this._tempTypeChecker.getPropertiesOfType(type);
-        props.forEach(prop => {
-            let resolvedPropertyType = this._tempTypeChecker.getTypeOfSymbolAtLocation(prop, undefined);
+
             console.log(resolvedPropertyType);
         });
 
-        // Get properties signatures
-        // let constructorType: ts.Type = this._tempTypeChecker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
-        // details.properties = constructorType.getConstructSignatures().map((signature: ts.Signature) => { return this._serializeSignature(signature); });
         return details;
     }
 
     /** Serialize a signature (call or constrouct) */
-    private _serializeSignature(signature: ts.Signature): ITypescriptSignatureEntry {
+    private _getSignatureEntry(signature: ts.Signature): ITypescriptSignatureEntry {
         return {
             documentation: ts.displayPartsToString(signature.getDocumentationComment()),
-            parameters: signature.parameters.map((symbol: ts.Symbol) => { return this._serializeSymbol(symbol); }),
-            returnType: this._tempTypeChecker.typeToString(signature.getReturnType())
+            parameters: signature.parameters.map((symbol: ts.Symbol) => { return this._getSymbolEntry(symbol); }),
+            returnType: this._typeChecker.typeToString(signature.getReturnType())
         };
     }
 
     /** Serialize a symbol into a json object */
-    private _serializeSymbol(symbol: ts.Symbol): ITypescriptSimbolEntry {
+    private _getSymbolEntry(symbol: ts.Symbol): ITypescriptSimbolEntry {
         return {
             documentation: ts.displayPartsToString(symbol.getDocumentationComment()),
             name: symbol.getName(),
-            type: this._tempTypeChecker.typeToString(this._tempTypeChecker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration))
+            type: this._typeChecker.typeToString(this._typeChecker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration))
         };
     }
 
