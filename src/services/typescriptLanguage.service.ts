@@ -89,6 +89,7 @@ export class TypescriptLanguageService extends Disposable {
         // https://basarat.gitbooks.io/typescript/content/docs/compiler/overview.html
         let classType: ts.Type = this._typeChecker.getTypeAtLocation(symbol.valueDeclaration);
         let props: ts.Symbol[] = this._typeChecker.getPropertiesOfType(classType);
+
         props.forEach((prop: ts.Symbol) => {
             let resolvedPropertyType: ts.Type = this._typeChecker.getTypeOfSymbolAtLocation(prop, undefined);
             let temp: any = resolvedPropertyType.getCallSignatures().map((signature: ts.Signature) => { return this._getSignatureEntry(signature); });

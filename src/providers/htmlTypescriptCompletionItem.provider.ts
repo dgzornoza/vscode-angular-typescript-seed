@@ -1,5 +1,7 @@
 import * as vsc from "vscode";
 import * as path from "path";
+import * as ts from "typescript";
+import * as TsTypeInfo from "ts-type-info";
 import { injectable, inject } from "inversify";
 import "reflect-metadata";
 
@@ -8,14 +10,15 @@ import { ViewsControllersService } from "./../services/viewController.service";
 import { TypescriptLanguageService } from "./../services/typescriptLanguage.service";
 
 
+/** Provider for typescript completion in html view files, completion is in controller scope related */
 @injectable()
 export class HtmlTypescriptCompletionItemProvider extends Disposable implements vsc.CompletionItemProvider {
 
     private _viewsControllersService: ViewsControllersService;
     private _typescriptLanguageService: TypescriptLanguageService;
 
-    constructor(@inject("ViewsControllersService") viewsControllersService: ViewsControllersService,
-                @inject("TypescriptLanguageService") typescriptLanguageService: TypescriptLanguageService) {
+    constructor( @inject("ViewsControllersService") viewsControllersService: ViewsControllersService,
+        @inject("TypescriptLanguageService") typescriptLanguageService: TypescriptLanguageService) {
         super();
 
         this._viewsControllersService = viewsControllersService;
@@ -43,8 +46,8 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
 
         return new Promise((resolve, reject) => {
 
-            var completionItems:vsc.CompletionItem[] = [];
-            var completionItem:vsc.CompletionItem = new vsc.CompletionItem("id");
+            let completionItems: vsc.CompletionItem[] = [];
+            let completionItem: vsc.CompletionItem = new vsc.CompletionItem("id");
             completionItem.detail = "test javascript detail";
             completionItem.documentation = "sdfsd";
             completionItem.filterText = "test";
@@ -80,7 +83,49 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
             let normalizedActiveEditorPath: string = path.normalize(vsc.window.activeTextEditor.document.fileName);
             let resolvedPath: string = this._viewsControllersService.getControllerFromViewPath(vsc.window.activeTextEditor.document.fileName);
 
-            this._typescriptLanguageService.generateDocumentation([resolvedPath], "", {});
+
+
+
+            let files = [
+                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\config.ts",
+                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\helpers.ts",
+                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\main.ts",
+                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\routesConfig.ts",
+                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\controllers\\about.controller.ts",
+                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\controllers\\contact.controller.ts",
+                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\controllers\\home.controller.ts",
+                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\controllers\\users.controller.ts",
+                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\directives\\dialog.directive.ts",
+                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\services\\httpInterceptor.service.ts",
+                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\services\\routeResolver.provider.ts",
+                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\services\\users.service.ts",
+                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\models\\users.d.ts"];
+
+
+
+            // this._typescriptLanguageService.generateDocumentation(files, "",
+            // {
+            //     noEmitOnError: true, noImplicitAny: true,
+            //     target: ts.ScriptTarget.ES5, module: ts.ModuleKind.AMD
+            // });
+
+            const result = TsTypeInfo.getInfoFromFiles(files,
+                {
+                    compilerOptions: {
+                        noEmitOnError: true, noImplicitAny: true,
+                        target: ts.ScriptTarget.ES5, module: ts.ModuleKind.AMD
+                    }
+                });
+
+            // let c = result.getFile("users.d.ts").getInterface("IUserModel");
+            let d = result.getFile("users.controller.ts").getClass("UsersController").getMethod("test");
+            // const property = result.getFile("TestFile.ts")
+            //     .getClass("MyClass")                            // get first by name
+            //     .getProperty(p => p.defaultExpression != null); // or first by what matches
+
+            let y =5;
+
         }
+
     }
 }
