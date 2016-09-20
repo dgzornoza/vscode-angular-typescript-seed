@@ -84,24 +84,23 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
             let resolvedPath: string = this._viewsControllersService.getControllerFromViewPath(vsc.window.activeTextEditor.document.fileName);
 
 
-
+            //let basePath = "d:\\Projects\\OpenSource\\angular-typescript-seed\\";
+            let basePath = "C:\\Datos\\Proyectos\\dgzornoza\\OpenSource\\angular-typescript-seed\\";
 
             let files = [
-                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\config.ts",
-                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\helpers.ts",
-                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\main.ts",
-                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\routesConfig.ts",
-                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\controllers\\about.controller.ts",
-                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\controllers\\contact.controller.ts",
-                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\controllers\\home.controller.ts",
-                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\controllers\\users.controller.ts",
-                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\directives\\dialog.directive.ts",
-                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\services\\httpInterceptor.service.ts",
-                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\services\\routeResolver.provider.ts",
-                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\services\\users.service.ts",
-                "d:\\Projects\\OpenSource\\angular-typescript-seed\\src\\app\\models\\users.d.ts"];
-
-
+                basePath + "src\\app\\config.ts",
+                basePath + "src\\app\\helpers.ts",
+                basePath + "src\\app\\main.ts",
+                basePath + "src\\app\\routesConfig.ts",
+                basePath + "src\\app\\controllers\\about.controller.ts",
+                basePath + "src\\app\\controllers\\contact.controller.ts",
+                basePath + "src\\app\\controllers\\home.controller.ts",
+                basePath + "src\\app\\controllers\\users.controller.ts",
+                basePath + "src\\app\\directives\\dialog.directive.ts",
+                basePath + "src\\app\\services\\httpInterceptor.service.ts",
+                basePath + "src\\app\\services\\routeResolver.provider.ts",
+                basePath + "src\\app\\services\\users.service.ts",
+                basePath + "src\\app\\models\\users.d.ts"];
 
             // this._typescriptLanguageService.generateDocumentation(files, "",
             // {
@@ -111,19 +110,31 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
 
             const result = TsTypeInfo.getInfoFromFiles(files,
                 {
-                    compilerOptions: {
-                        noEmitOnError: true, noImplicitAny: true,
-                        target: ts.ScriptTarget.ES5, module: ts.ModuleKind.AMD
-                    }
+                    compilerOptions:
+                    {
+                        "module": "amd",
+                        "rootDir": "..",
+                        //"moduleResolution": "classic",
+                        "emitDecoratorMetadata": true,
+                        "experimentalDecorators": true,
+                        "noImplicitAny": false,
+                        "noEmitOnError": true,
+                        "removeComments": false,
+                        "target": "es5",
+                        "declaration": false,
+                        "inlineSourceMap": true,
+                        "inlineSources": false
+                    },
+                    showDebugMessages: true
                 });
 
             // let c = result.getFile("users.d.ts").getInterface("IUserModel");
-            let d = result.getFile("users.controller.ts").getClass("UsersController").getMethod("test");
+            let d = result.getFile("users.controller.ts").getClass("UsersController").getMethod("testadgz");
             // const property = result.getFile("TestFile.ts")
             //     .getClass("MyClass")                            // get first by name
             //     .getProperty(p => p.defaultExpression != null); // or first by what matches
 
-            let y =5;
+            let y = 5;
 
         }
 
