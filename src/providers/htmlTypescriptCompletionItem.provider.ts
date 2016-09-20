@@ -108,6 +108,9 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
             //     target: ts.ScriptTarget.ES5, module: ts.ModuleKind.AMD
             // });
 
+            // TsParameteredBinderByNode:
+            // param.sourceFile.fileName === "C:/Datos/Proyectos/dgzornoza/OpenSource/angular-typescript-seed/src/app/controllers/users.controller.ts"
+            // tsNode: 413
             const result = TsTypeInfo.getInfoFromFiles(files,
                 {
                     compilerOptions:
