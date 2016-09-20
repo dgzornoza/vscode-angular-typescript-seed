@@ -36,6 +36,14 @@ export class ViewsControllersService extends Disposable {
         return controllerPath;
     }
 
+    /** Function for obtain controller class name from normalized path
+     * @param normalizedPath normalized controller path
+     * @return controller name
+     */
+    public getControllerClassNameFromPath(normalizedPath: string): string {
+         return normalizedPath.split("/").pop().replace("controller.js", "");
+    }
+
     public dispose(): void {
         // not used
     }

@@ -29,10 +29,10 @@ export class ChangeViewControllerCmd extends ICommand<any> {
         let resolvedPath: string;
         switch (vsc.window.activeTextEditor.document.languageId) {
             case "typescript":
-                resolvedPath = this._viewsControllersService.getViewFromControllerPath(vsc.window.activeTextEditor.document.fileName);
+                resolvedPath = this._viewsControllersService.getViewFromControllerPath(normalizedActiveEditorPath);
                 break;
             case "html":
-                resolvedPath = this._viewsControllersService.getControllerFromViewPath(vsc.window.activeTextEditor.document.fileName);
+                resolvedPath = this._viewsControllersService.getControllerFromViewPath(normalizedActiveEditorPath);
                 break;
 
             default: ;

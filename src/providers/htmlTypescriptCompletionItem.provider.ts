@@ -7,22 +7,31 @@ import "reflect-metadata";
 
 import { Disposable } from "./../models/disposable";
 import { ViewsControllersService } from "./../services/viewController.service";
-import { TypescriptLanguageService } from "./../services/typescriptLanguage.service";
 
+
+const TS_TYPE_INFO_OPTIONS: TsTypeInfo.Options =
+    {
+        compilerOptions: {
+            module: ts.ModuleKind.AMD,
+            moduleResolution: ts.ModuleResolutionKind.Classic,
+            noEmitOnError: true,
+            noImplicitAny: true,
+            target: ts.ScriptTarget.ES5
+        },
+        showDebugMessages: false
+    };
 
 /** Provider for typescript completion in html view files, completion is in controller scope related */
 @injectable()
 export class HtmlTypescriptCompletionItemProvider extends Disposable implements vsc.CompletionItemProvider {
 
     private _viewsControllersService: ViewsControllersService;
-    private _typescriptLanguageService: TypescriptLanguageService;
+    private _currentControllerClassDefinition: TsTypeInfo.ClassDefinition;
 
-    constructor( @inject("ViewsControllersService") viewsControllersService: ViewsControllersService,
-        @inject("TypescriptLanguageService") typescriptLanguageService: TypescriptLanguageService) {
+    constructor( @inject("ViewsControllersService") viewsControllersService: ViewsControllersService) {
         super();
 
         this._viewsControllersService = viewsControllersService;
-        this._typescriptLanguageService = typescriptLanguageService;
 
         // subscribe to events
         vsc.window.onDidChangeActiveTextEditor(this._onDidChangeActiveTextEditor, this, this._subscriptions);
@@ -46,15 +55,41 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
 
         return new Promise((resolve, reject) => {
 
-            let completionItems: vsc.CompletionItem[] = [];
-            let completionItem: vsc.CompletionItem = new vsc.CompletionItem("id");
-            completionItem.detail = "test javascript detail";
-            completionItem.documentation = "sdfsd";
-            completionItem.filterText = "test";
-            completionItem.insertText = "bb";
-            completionItem.label = "test";
+            // loop class memembers for set in intellisense
+            let methods: vsc.CompletionItem[] = this._currentControllerClassDefinition.methods
+                .filter((value: TsTypeInfo.ClassMethodDefinition) => {
+                    return value.scope === "public";
+                })
+                .map((value: TsTypeInfo.ClassMethodDefinition) => {
+                    return this._createCompletionItemFromMethod(value);
+                });
 
-            completionItems.push(completionItem);
+            let properties: vsc.CompletionItem[] = this._currentControllerClassDefinition.properties
+                .filter((value: TsTypeInfo.ClassPropertyDefinition) => {
+                    return value.scope === "public";
+                })
+                .map((value: TsTypeInfo.ClassPropertyDefinition) => {
+                    return this._createCompletionItemFromProperty(value);
+                });
+
+            let staticMethods: vsc.CompletionItem[] = this._currentControllerClassDefinition.staticMethods
+                .filter((value: TsTypeInfo.ClassStaticMethodDefinition) => {
+                    return value.scope === "public";
+                })
+                .map((value: TsTypeInfo.ClassStaticMethodDefinition) => {
+                    return this._createCompletionItemFromStaticMethod(value);
+                });
+
+            let staticsProperties: vsc.CompletionItem[] = this._currentControllerClassDefinition.staticProperties
+                .filter((value: TsTypeInfo.ClassStaticPropertyDefinition) => {
+                    return value.scope === "public";
+                })
+                .map((value: TsTypeInfo.ClassStaticPropertyDefinition) => {
+                    return this._createCompletionItemFromStaticProperty(value);
+                });
+
+            let completionItems: vsc.CompletionItem[] = methods.concat(properties).concat(staticMethods).concat(staticsProperties);
+
             resolve(completionItems);
         });
     }
@@ -80,66 +115,53 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
         // parse typescript controller attached to html file for intellisense
         if (vsc.window.activeTextEditor.document.languageId === "html") {
 
+            // get controller path
             let normalizedActiveEditorPath: string = path.normalize(vsc.window.activeTextEditor.document.fileName);
-            let resolvedPath: string = this._viewsControllersService.getControllerFromViewPath(vsc.window.activeTextEditor.document.fileName);
+            let controllerPath: string = this._viewsControllersService.getControllerFromViewPath(normalizedActiveEditorPath);
 
-
-            //let basePath = "d:\\Projects\\OpenSource\\angular-typescript-seed\\";
-            let basePath = "C:\\Datos\\Proyectos\\dgzornoza\\OpenSource\\angular-typescript-seed\\";
-
-            let files = [
-                basePath + "src\\app\\config.ts",
-                basePath + "src\\app\\helpers.ts",
-                basePath + "src\\app\\main.ts",
-                basePath + "src\\app\\routesConfig.ts",
-                basePath + "src\\app\\controllers\\about.controller.ts",
-                basePath + "src\\app\\controllers\\contact.controller.ts",
-                basePath + "src\\app\\controllers\\home.controller.ts",
-                basePath + "src\\app\\controllers\\users.controller.ts",
-                basePath + "src\\app\\directives\\dialog.directive.ts",
-                basePath + "src\\app\\services\\httpInterceptor.service.ts",
-                basePath + "src\\app\\services\\routeResolver.provider.ts",
-                basePath + "src\\app\\services\\users.service.ts",
-                basePath + "src\\app\\models\\users.d.ts"];
-
-            // this._typescriptLanguageService.generateDocumentation(files, "",
-            // {
-            //     noEmitOnError: true, noImplicitAny: true,
-            //     target: ts.ScriptTarget.ES5, module: ts.ModuleKind.AMD
-            // });
-
-            // TsParameteredBinderByNode:
-            // param.sourceFile.fileName === "C:/Datos/Proyectos/dgzornoza/OpenSource/angular-typescript-seed/src/app/controllers/users.controller.ts"
-            // tsNode: 413
-            const result = TsTypeInfo.getInfoFromFiles(files,
-                {
-                    compilerOptions:
-                    {
-                        "module": "amd",
-                        "rootDir": "..",
-                        //"moduleResolution": "classic",
-                        "emitDecoratorMetadata": true,
-                        "experimentalDecorators": true,
-                        "noImplicitAny": false,
-                        "noEmitOnError": true,
-                        "removeComments": false,
-                        "target": "es5",
-                        "declaration": false,
-                        "inlineSourceMap": true,
-                        "inlineSources": false
-                    },
-                    showDebugMessages: true
-                });
-
-            // let c = result.getFile("users.d.ts").getInterface("IUserModel");
-            let d = result.getFile("users.controller.ts").getClass("UsersController").getMethod("testadgz");
-            // const property = result.getFile("TestFile.ts")
-            //     .getClass("MyClass")                            // get first by name
-            //     .getProperty(p => p.defaultExpression != null); // or first by what matches
-
-            let y = 5;
-
+            // get controller class info for intellisense
+            let tsInfo: TsTypeInfo.GlobalDefinition = TsTypeInfo.getInfoFromFiles([controllerPath], TS_TYPE_INFO_OPTIONS);
+            this._currentControllerClassDefinition = tsInfo.getFile("users.controller.ts").getClass("UsersController");
         }
+    }
 
+    private _createCompletionItemFromMethod(definition: TsTypeInfo.ClassMethodDefinition): vsc.CompletionItem {
+
+        let completionItem: vsc.CompletionItem = new vsc.CompletionItem("id");
+        completionItem.filterText = definition.name;
+        completionItem.insertText = definition.name;
+        completionItem.label = definition.name;
+        completionItem.kind = vsc.CompletionItemKind.Method;
+        return completionItem;
+    }
+
+    private _createCompletionItemFromProperty(definition: TsTypeInfo.ClassPropertyDefinition): vsc.CompletionItem {
+
+        let completionItem: vsc.CompletionItem = new vsc.CompletionItem("id");
+        completionItem.filterText = definition.name;
+        completionItem.insertText = definition.name;
+        completionItem.label = definition.name;
+        completionItem.kind = vsc.CompletionItemKind.Property;
+        return completionItem;
+    }
+
+    private _createCompletionItemFromStaticMethod(definition: TsTypeInfo.ClassStaticMethodDefinition): vsc.CompletionItem {
+
+        let completionItem: vsc.CompletionItem = new vsc.CompletionItem("id");
+        completionItem.filterText = definition.name;
+        completionItem.insertText = definition.name;
+        completionItem.label = definition.name;
+        completionItem.kind = vsc.CompletionItemKind.Function;
+        return completionItem;
+    }
+
+    private _createCompletionItemFromStaticProperty(definition: TsTypeInfo.ClassStaticPropertyDefinition): vsc.CompletionItem {
+
+        let completionItem: vsc.CompletionItem = new vsc.CompletionItem("id");
+        completionItem.filterText = definition.name;
+        completionItem.insertText = definition.name;
+        completionItem.label = definition.name;
+        completionItem.kind = vsc.CompletionItemKind.Property;
+        return completionItem;
     }
 }
