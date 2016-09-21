@@ -41,7 +41,8 @@ export class ViewsControllersService extends Disposable {
      * @return controller name
      */
     public getControllerClassNameFromPath(normalizedPath: string): string {
-         return normalizedPath.split("/").pop().replace("controller.js", "");
+         let result: string = normalizedPath.split("\\").pop().replace(".controller.ts", "");
+         return result.charAt(0).toUpperCase() + result.slice(1) + "Controller";
     }
 
     public getControllerRouteAlias(normalizedPath: string): string {

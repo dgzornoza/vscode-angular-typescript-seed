@@ -91,12 +91,14 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
             let normalizedActiveEditorPath: string = path.normalize(vsc.window.activeTextEditor.document.fileName);
             let controllerPath: string = this._viewsControllersService.getControllerFromViewPath(normalizedActiveEditorPath);
 
-            // get controller class info for intellisense
-            let tsInfo: TsTypeInfo.GlobalDefinition = TsTypeInfo.getInfoFromFiles([controllerPath], TS_TYPE_INFO_OPTIONS);
-            this._currentControllerClassDefinition = tsInfo.getFile("users.controller.ts").getClass("UsersController");
-
-            // get controller route alias
+            // store controller route alias
             this._currentControllerRouteAlias = this._viewsControllersService.getControllerRouteAlias(controllerPath);
+
+            // get controller class info for intellisense
+            let controllerClassName: string = this._viewsControllersService.getControllerClassNameFromPath(controllerPath);
+            let tsInfo: TsTypeInfo.GlobalDefinition = TsTypeInfo.getInfoFromFiles([controllerPath], TS_TYPE_INFO_OPTIONS);
+            this._currentControllerClassDefinition = tsInfo.getFile(controllerPath.split("\\").pop()).getClass(controllerClassName);
+            let a = 5;
         }
     }
 
