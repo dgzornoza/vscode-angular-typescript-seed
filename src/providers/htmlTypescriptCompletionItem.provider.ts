@@ -98,7 +98,6 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
             let controllerClassName: string = this._viewsControllersService.getControllerClassNameFromPath(controllerPath);
             let tsInfo: TsTypeInfo.GlobalDefinition = TsTypeInfo.getInfoFromFiles([controllerPath], TS_TYPE_INFO_OPTIONS);
             this._currentControllerClassDefinition = tsInfo.getFile(controllerPath.split("\\").pop()).getClass(controllerClassName);
-            let a = 5;
         }
     }
 
