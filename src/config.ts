@@ -94,7 +94,8 @@ export class SeedEnvironmentConfig {
 
                     do {
                         // store routes alias from regex
-                        this._routesAlias[routesMatches[3] || routesMatches[5]] = routesMatches[1] || routesMatches[7];
+                        let routeMatch: string = routesMatches[3] || routesMatches[5];
+                        this._routesAlias[path.normalize(routeMatch)] = routesMatches[1] || routesMatches[7];
 
                         if (routesMatches.index === ROUTES_ALIAS_REGEXP.lastIndex) {
                             ROUTES_ALIAS_REGEXP.lastIndex++;

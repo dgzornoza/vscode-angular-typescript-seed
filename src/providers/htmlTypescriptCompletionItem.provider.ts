@@ -8,18 +8,19 @@ import "reflect-metadata";
 import { Disposable } from "./../models/disposable";
 import { ViewsControllersService } from "./../services/viewController.service";
 
+const TS_TYPE_INFO_OPTIONS: TsTypeInfo.Options = {
+    compilerOptions: {
+        module: ts.ModuleKind.AMD,
+        moduleResolution: ts.ModuleResolutionKind.Classic,
+        noEmitOnError: true,
+        noImplicitAny: true,
+        target: ts.ScriptTarget.ES5
+    },
+    showDebugMessages: false
+};
 
-const TS_TYPE_INFO_OPTIONS: TsTypeInfo.Options =
-    {
-        compilerOptions: {
-            module: ts.ModuleKind.AMD,
-            moduleResolution: ts.ModuleResolutionKind.Classic,
-            noEmitOnError: true,
-            noImplicitAny: true,
-            target: ts.ScriptTarget.ES5
-        },
-        showDebugMessages: false
-    };
+type MemberDefinition = TsTypeInfo.ClassMethodDefinition | TsTypeInfo.ClassPropertyDefinition |
+    TsTypeInfo.ClassStaticMethodDefinition | TsTypeInfo.ClassStaticPropertyDefinition
 
 /** Provider for typescript completion in html view files, completion is in controller scope related */
 @injectable()
@@ -27,6 +28,7 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
 
     private _viewsControllersService: ViewsControllersService;
     private _currentControllerClassDefinition: TsTypeInfo.ClassDefinition;
+    private _currentControllerRouteAlias: string;
 
     constructor( @inject("ViewsControllersService") viewsControllersService: ViewsControllersService) {
         super();
@@ -53,42 +55,12 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
     public provideCompletionItems(document: vsc.TextDocument, position: vsc.Position, token: vsc.CancellationToken): vsc.CompletionItem[] |
         Thenable<vsc.CompletionItem[]> | vsc.CompletionList | Thenable<vsc.CompletionList> {
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: (value: vsc.CompletionItem[]) => void, reject: (reason?: any) => void) => {
 
             // loop class memembers for set in intellisense
-            let methods: vsc.CompletionItem[] = this._currentControllerClassDefinition.methods
-                .filter((value: TsTypeInfo.ClassMethodDefinition) => {
-                    return value.scope === "public";
-                })
-                .map((value: TsTypeInfo.ClassMethodDefinition) => {
-                    return this._createCompletionItemFromMethod(value);
-                });
-
-            let properties: vsc.CompletionItem[] = this._currentControllerClassDefinition.properties
-                .filter((value: TsTypeInfo.ClassPropertyDefinition) => {
-                    return value.scope === "public";
-                })
-                .map((value: TsTypeInfo.ClassPropertyDefinition) => {
-                    return this._createCompletionItemFromProperty(value);
-                });
-
-            let staticMethods: vsc.CompletionItem[] = this._currentControllerClassDefinition.staticMethods
-                .filter((value: TsTypeInfo.ClassStaticMethodDefinition) => {
-                    return value.scope === "public";
-                })
-                .map((value: TsTypeInfo.ClassStaticMethodDefinition) => {
-                    return this._createCompletionItemFromStaticMethod(value);
-                });
-
-            let staticsProperties: vsc.CompletionItem[] = this._currentControllerClassDefinition.staticProperties
-                .filter((value: TsTypeInfo.ClassStaticPropertyDefinition) => {
-                    return value.scope === "public";
-                })
-                .map((value: TsTypeInfo.ClassStaticPropertyDefinition) => {
-                    return this._createCompletionItemFromStaticProperty(value);
-                });
-
-            let completionItems: vsc.CompletionItem[] = methods.concat(properties).concat(staticMethods).concat(staticsProperties);
+            let completionItems: vsc.CompletionItem[] = this._getClassPublicMembers().map((item: MemberDefinition) => {
+                return this._createCompletionItem(item);
+            });
 
             resolve(completionItems);
         });
@@ -122,46 +94,37 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
             // get controller class info for intellisense
             let tsInfo: TsTypeInfo.GlobalDefinition = TsTypeInfo.getInfoFromFiles([controllerPath], TS_TYPE_INFO_OPTIONS);
             this._currentControllerClassDefinition = tsInfo.getFile("users.controller.ts").getClass("UsersController");
+
+            // get controller route alias
+            this._currentControllerRouteAlias = this._viewsControllersService.getControllerRouteAlias(controllerPath);
         }
     }
 
-    private _createCompletionItemFromMethod(definition: TsTypeInfo.ClassMethodDefinition): vsc.CompletionItem {
+    private _getClassPublicMembers(): MemberDefinition[] {
+
+        let result: MemberDefinition[] = [];
+
+        // concat methods, properties and statics
+        result = result.concat(this._currentControllerClassDefinition.methods)
+            .concat(this._currentControllerClassDefinition.properties)
+            .concat(this._currentControllerClassDefinition.staticMethods)
+            .concat(this._currentControllerClassDefinition.staticProperties);
+
+        // filter public
+        result = result.filter((value: TsTypeInfo.ClassMethodDefinition) => {
+            return value.scope === "public";
+        });
+
+        return result;
+    }
+
+    private _createCompletionItem(definition: MemberDefinition): vsc.CompletionItem {
 
         let completionItem: vsc.CompletionItem = new vsc.CompletionItem("id");
         completionItem.filterText = definition.name;
         completionItem.insertText = definition.name;
         completionItem.label = definition.name;
         completionItem.kind = vsc.CompletionItemKind.Method;
-        return completionItem;
-    }
-
-    private _createCompletionItemFromProperty(definition: TsTypeInfo.ClassPropertyDefinition): vsc.CompletionItem {
-
-        let completionItem: vsc.CompletionItem = new vsc.CompletionItem("id");
-        completionItem.filterText = definition.name;
-        completionItem.insertText = definition.name;
-        completionItem.label = definition.name;
-        completionItem.kind = vsc.CompletionItemKind.Property;
-        return completionItem;
-    }
-
-    private _createCompletionItemFromStaticMethod(definition: TsTypeInfo.ClassStaticMethodDefinition): vsc.CompletionItem {
-
-        let completionItem: vsc.CompletionItem = new vsc.CompletionItem("id");
-        completionItem.filterText = definition.name;
-        completionItem.insertText = definition.name;
-        completionItem.label = definition.name;
-        completionItem.kind = vsc.CompletionItemKind.Function;
-        return completionItem;
-    }
-
-    private _createCompletionItemFromStaticProperty(definition: TsTypeInfo.ClassStaticPropertyDefinition): vsc.CompletionItem {
-
-        let completionItem: vsc.CompletionItem = new vsc.CompletionItem("id");
-        completionItem.filterText = definition.name;
-        completionItem.insertText = definition.name;
-        completionItem.label = definition.name;
-        completionItem.kind = vsc.CompletionItemKind.Property;
         return completionItem;
     }
 }

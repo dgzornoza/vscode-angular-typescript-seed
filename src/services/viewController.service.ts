@@ -15,18 +15,18 @@ export class ViewsControllersService extends Disposable {
     }
 
     /** Function for obtain normalized view path from normalized controller path
-     * @param normalized controllerPath controller path for obtain related view path
+     * @param normalizedControllerPath normalized controllerPath controller path for obtain related view path
      * @return normalized view path related
      */
-    public getViewFromControllerPath(controllerPath: string): string {
+    public getViewFromControllerPath(normalizedControllerPath: string): string {
 
-        let viewPath: string = controllerPath.replace(SeedEnvironmentConfig.ControllersBasePath, SeedEnvironmentConfig.ViewBasePath);
+        let viewPath: string = normalizedControllerPath.replace(SeedEnvironmentConfig.ControllersBasePath, SeedEnvironmentConfig.ViewBasePath);
         viewPath = viewPath.replace(".controller.ts", ".html");
         return viewPath;
     }
 
     /** Function for obtain normalized controller path from normalized view path
-     * @param normalized viewPath view path for obtain related controller path
+     * @param normalizedViewPath normalized viewPath view path for obtain related controller path
      * @return normalized controller path related
      */
     public getControllerFromViewPath(normalizedViewPath: string): string {
@@ -42,6 +42,11 @@ export class ViewsControllersService extends Disposable {
      */
     public getControllerClassNameFromPath(normalizedPath: string): string {
          return normalizedPath.split("/").pop().replace("controller.js", "");
+    }
+
+    public getControllerRouteAlias(normalizedPath: string): string {
+        let regex: RegExp = new RegExp(`${SeedEnvironmentConfig.ControllersBasePath.replace(/\\/g, "\\\\")}(.*).controller.ts`);
+        return SeedEnvironmentConfig.RoutesAlias[regex.exec(normalizedPath)[1]];
     }
 
     public dispose(): void {
