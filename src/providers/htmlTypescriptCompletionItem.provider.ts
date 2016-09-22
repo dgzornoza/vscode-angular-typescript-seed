@@ -55,6 +55,12 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
     public provideCompletionItems(document: vsc.TextDocument, position: vsc.Position, token: vsc.CancellationToken): vsc.CompletionItem[] |
         Thenable<vsc.CompletionItem[]> | vsc.CompletionList | Thenable<vsc.CompletionList> {
 
+        let start: vsc.Position = new vsc.Position(0, 0);
+        let range: vsc.Range = new vsc.Range(start, position);
+        let text: string = document.getText(range);
+
+        let completionRegex: RegExp = new RegExp(`[{|{{|"]\s*${this._currentControllerRouteAlias}(.*)$`);
+
         return new Promise((resolve: (value: vsc.CompletionItem[]) => void, reject: (reason?: any) => void) => {
 
             // loop class memembers for set in intellisense
@@ -79,7 +85,6 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
     public getProviderTriggerCharacters(): string[] {
         return ["."];
     }
-
 
 
     private _onDidChangeActiveTextEditor(): void {
