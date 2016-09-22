@@ -1,5 +1,6 @@
 import * as vsc from "vscode";
 import * as path from "path";
+import * as fs from "fs";
 import * as ts from "typescript";
 import * as TsTypeInfo from "ts-type-info";
 import { injectable, inject } from "inversify";
@@ -21,6 +22,8 @@ const TS_TYPE_INFO_OPTIONS: TsTypeInfo.Options = {
 
 type MemberDefinition = TsTypeInfo.ClassMethodDefinition | TsTypeInfo.ClassPropertyDefinition |
     TsTypeInfo.ClassStaticMethodDefinition | TsTypeInfo.ClassStaticPropertyDefinition
+type TypedDefinitions = (TsTypeInfo.ClassDefinition | TsTypeInfo.FunctionDefinition | TsTypeInfo.InterfaceDefinition |
+    TsTypeInfo.EnumDefinition | TsTypeInfo.NamespaceDefinition | TsTypeInfo.VariableDefinition | TsTypeInfo.TypeAliasDefinition)[]
 
 /** Provider for typescript completion in html view files, completion is in controller scope related */
 @injectable()
@@ -55,20 +58,49 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
     public provideCompletionItems(document: vsc.TextDocument, position: vsc.Position, token: vsc.CancellationToken): vsc.CompletionItem[] |
         Thenable<vsc.CompletionItem[]> | vsc.CompletionList | Thenable<vsc.CompletionList> {
 
-        let start: vsc.Position = new vsc.Position(0, 0);
-        let range: vsc.Range = new vsc.Range(start, position);
-        let text: string = document.getText(range);
-
-        let completionRegex: RegExp = new RegExp(`[{|{{|"]\s*${this._currentControllerRouteAlias}(.*)$`);
-
         return new Promise((resolve: (value: vsc.CompletionItem[]) => void, reject: (reason?: any) => void) => {
 
-            // loop class memembers for set in intellisense
-            let completionItems: vsc.CompletionItem[] = this._getClassPublicMembers().map((item: MemberDefinition) => {
-                return this._createCompletionItem(item);
-            });
+            if (this._currentControllerClassDefinition) {
+                let completionItems: vsc.CompletionItem[];
 
-            resolve(completionItems);
+                // verify use controller alias
+                let start: vsc.Position = new vsc.Position(0, 0);
+                let range: vsc.Range = new vsc.Range(start, position);
+                let text: string = document.getText(range);
+                // regex for {vm.}, {{vm.}}, "vm.", "{ class: vm.}"
+                let completionRegex: RegExp = new RegExp(`[{|{{|"|".*:]\\s*${this._currentControllerRouteAlias}\\.(.*)$`);
+                let match: RegExpExecArray = completionRegex.exec(text);
+
+                if (undefined != match) {
+
+                    // search trasversal members
+                    if (match[1]) {
+                        let objectNames: string[] = match[1].slice(0, -1).split(".");
+                        for (let objectName of objectNames) {
+
+                            let currentObject: MemberDefinition = this._getClassPublicMembers(this._currentControllerClassDefinition)
+                                .find((member: MemberDefinition): boolean => {
+                                    return member.name === objectName;
+                                });
+
+                            // property
+                            if ((currentObject as TsTypeInfo.ClassPropertyDefinition).isAccessor) {
+                                let a = (currentObject as TsTypeInfo.ClassPropertyDefinition).type.definitions;
+                                let b = 5;
+                            }
+                        }
+
+                    // controller members
+                    } else {
+                        // loop class memembers for set in intellisense
+                        completionItems = this._getClassPublicMembers(this._currentControllerClassDefinition).map((item: MemberDefinition) => {
+                            return this._createCompletionItem(item);
+                        });
+                    }
+                }
+
+                resolve(completionItems);
+            }
         });
     }
 
@@ -89,32 +121,40 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
 
     private _onDidChangeActiveTextEditor(): void {
 
-        // parse typescript controller attached to html file for intellisense
+        // parse typescript controller attached to html file for get class definition
         if (vsc.window.activeTextEditor.document.languageId === "html") {
 
             // get controller path
             let normalizedActiveEditorPath: string = path.normalize(vsc.window.activeTextEditor.document.fileName);
             let controllerPath: string = this._viewsControllersService.getControllerFromViewPath(normalizedActiveEditorPath);
 
-            // store controller route alias
-            this._currentControllerRouteAlias = this._viewsControllersService.getControllerRouteAlias(controllerPath);
+            fs.exists(controllerPath, (exists: boolean) => {
 
-            // get controller class info for intellisense
-            let controllerClassName: string = this._viewsControllersService.getControllerClassNameFromPath(controllerPath);
-            let tsInfo: TsTypeInfo.GlobalDefinition = TsTypeInfo.getInfoFromFiles([controllerPath], TS_TYPE_INFO_OPTIONS);
-            this._currentControllerClassDefinition = tsInfo.getFile(controllerPath.split("\\").pop()).getClass(controllerClassName);
+                if (exists) {
+                    // store controller route alias
+                    this._currentControllerRouteAlias = this._viewsControllersService.getControllerRouteAlias(controllerPath);
+
+                    // get controller class info for intellisense
+                    let controllerClassName: string = this._viewsControllersService.getControllerClassNameFromPath(controllerPath);
+                    let tsInfo: TsTypeInfo.GlobalDefinition = TsTypeInfo.getInfoFromFiles([controllerPath], TS_TYPE_INFO_OPTIONS);
+                    this._currentControllerClassDefinition = tsInfo.getFile(controllerPath.split("\\").pop()).getClass(controllerClassName);
+
+                } else {
+                    this._currentControllerClassDefinition = undefined;
+                }
+            });
         }
     }
 
-    private _getClassPublicMembers(): MemberDefinition[] {
+    private _getClassPublicMembers(classDefinition: TsTypeInfo.ClassDefinition): MemberDefinition[] {
 
         let result: MemberDefinition[] = [];
 
         // concat methods, properties and statics
-        result = result.concat(this._currentControllerClassDefinition.methods)
-            .concat(this._currentControllerClassDefinition.properties)
-            .concat(this._currentControllerClassDefinition.staticMethods)
-            .concat(this._currentControllerClassDefinition.staticProperties);
+        result = result.concat(classDefinition.methods)
+            .concat(classDefinition.properties)
+            .concat(classDefinition.staticMethods)
+            .concat(classDefinition.staticProperties);
 
         // filter public
         result = result.filter((value: TsTypeInfo.ClassMethodDefinition) => {
@@ -123,6 +163,24 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
 
         return result;
     }
+
+    // private _getTypedPublicMembers(typedDefinition: TsTypeInfo.TypedDefinition[]): MemberDefinition[] {
+
+    //     let result: MemberDefinition[] = [];
+
+    //     // concat methods, properties and statics
+    //     result = result.concat(typedDefinition.)
+    //         .concat(classDefinition.properties)
+    //         .concat(classDefinition.staticMethods)
+    //         .concat(classDefinition.staticProperties);
+
+    //     // filter public
+    //     result = result.filter((value: TsTypeInfo.ClassMethodDefinition) => {
+    //         return value.scope === "public";
+    //     });
+
+    //     return result;
+    // }
 
     private _createCompletionItem(definition: MemberDefinition): vsc.CompletionItem {
 
