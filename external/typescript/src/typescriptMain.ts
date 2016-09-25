@@ -8,7 +8,7 @@
  * https://github.com/Microsoft/TypeScript-Sublime-Plugin/blob/master/TypeScript%20Indent.tmPreferences
  * ------------------------------------------------------------------------------------------ */
 'use strict';
-
+/* tslint:disable */
 import { env, languages, commands, workspace, window, Uri, ExtensionContext, Memento, IndentAction, Diagnostic, DiagnosticCollection, Range, DocumentFilter } from 'vscode';
 
 // This must be the first statement otherwise modules might got loaded with
@@ -52,7 +52,7 @@ interface LanguageDescription {
 	extensions: string[];
 }
 
-export function activate(context: ExtensionContext): void {
+export function activateTest(context: ExtensionContext): void {
 	let MODE_ID_TS = 'typescript';
 	let MODE_ID_TSX = 'typescriptreact';
 	let MODE_ID_JS = 'javascript';
@@ -63,7 +63,7 @@ export function activate(context: ExtensionContext): void {
 			id: 'typescript',
 			diagnosticSource: 'ts',
 			modeIds: [MODE_ID_TS, MODE_ID_TSX],
-			extensions: ['.ts', '.tsx']
+			extensions: ['.ts', '.tsx', "html"]
 		},
 		{
 			id: 'javascript',

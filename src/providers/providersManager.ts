@@ -6,7 +6,6 @@ import { Disposable } from "./../models/disposable";
 import { HtmlTypescriptCompletionItemProvider } from "./htmlTypescriptCompletionItem.provider";
 
 
-
 export interface IProvidersManager {
     HtmlTypescriptCompletionItemProvider: HtmlTypescriptCompletionItemProvider;
 }
@@ -28,9 +27,6 @@ export class ProvidersManager extends Disposable implements IProvidersManager  {
         //     this._htmlTypescriptCompletionItemProvider,
         //     ...this._htmlTypescriptCompletionItemProvider.getProviderTriggerCharacters()));
 
-        this._subscriptions.push(vsc.languages.registerCompletionItemProvider("html", new ),
-        //     this._htmlTypescriptCompletionItemProvider,
-        //     ...this._htmlTypescriptCompletionItemProvider.getProviderTriggerCharacters()));        
 
     }
 

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 'use strict';
-
+/* tslint:disable */
 import { CancellationToken, Uri } from 'vscode';
 import * as Proto from './protocol';
 

@@ -7,6 +7,7 @@ import { InversifyConfig } from "./inversify.config";
 import { IStatusBar } from "./components/statusBar.component";
 import { ProvidersManager } from "./providers/providersManager";
 
+import { activateTest } from "../external/typescript/src/typescriptMain";
 
 // this method is called when extension is activated
 // extension is activated the very first time the command is executed
@@ -24,6 +25,8 @@ export function activate(context: vsc.ExtensionContext): any {
             InversifyConfig.initialize(context);
             InversifyConfig.Kernel.get<IStatusBar>("IStatusBar");
             InversifyConfig.Kernel.get<ProvidersManager>("ProvidersManager");
+
+            activateTest(context);
         }
 
     });

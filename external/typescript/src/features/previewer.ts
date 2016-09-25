@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 'use strict';
-
+/* tslint:disable */
 import * as Proto from '../protocol';
 
 export function plain(parts: Proto.SymbolDisplayPart[]): string {

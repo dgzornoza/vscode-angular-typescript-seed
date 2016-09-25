@@ -16,7 +16,7 @@ export class SeedEnvironmentConfig {
     private static _isValidProject: boolean;
     private static _viewsBasePath: string;
     private static _controllersBasePath: string;
-    private static _routesAlias: IKeyValueMap<string>[];
+    private static _routesAlias: IKeyValueMap<string>;
 
     /** Initialize angular-typescript-seed-extension only if is based in angular-typescript-seed project
      * @return true if can activate extension (only if exists angular-typescript-seed project), false otherwise.
@@ -66,7 +66,7 @@ export class SeedEnvironmentConfig {
     public static get ControllersBasePath(): string {
         return SeedEnvironmentConfig._controllersBasePath;
     }
-    public static get RoutesAlias(): IKeyValueMap<string>[] {
+    public static get RoutesAlias(): IKeyValueMap<string> {
         return SeedEnvironmentConfig._routesAlias;
     }
 
@@ -90,7 +90,7 @@ export class SeedEnvironmentConfig {
                 // routes file
                 } else if (routesMatches != undefined) {
 
-                    this._routesAlias = [];
+                    this._routesAlias = {};
 
                     do {
                         // store routes alias from regex
