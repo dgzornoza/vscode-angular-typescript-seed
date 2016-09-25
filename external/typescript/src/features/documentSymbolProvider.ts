@@ -50,8 +50,8 @@ export default class TypeScriptDocumentSymbolProvider implements DocumentSymbolP
 		function convert(bucket: SymbolInformation[], item: Proto.NavigationBarItem, containerLabel?: string): void {
 			let result = new SymbolInformation(item.text,
 				outlineTypeTable[item.kind] || SymbolKind.Variable,
-				containerLabel,
-				new Location(resource.uri, textSpan2Range(item.spans[0])));
+				containerLabel as any,
+				new Location(resource.uri, textSpan2Range(item.spans[0])) as any);
 
 			if (item.childItems && item.childItems.length > 0) {
 				for (let child of item.childItems) {

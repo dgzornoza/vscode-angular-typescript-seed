@@ -74,8 +74,8 @@ export default class TypeScriptWorkspaceSymbolProvider implements WorkspaceSymbo
 					if (item.kind === 'method' || item.kind === 'function') {
 						label += '()';
 					}
-					result.push(new SymbolInformation(label, _kindMapping[item.kind], item.containerName,
-						new Location(this.client.asUrl(item.file), range)));
+					result.push(new SymbolInformation(label, _kindMapping[item.kind], item.containerName as any,
+						new Location(this.client.asUrl(item.file), range)  as any));
 				}
 				return result;
 			} else {

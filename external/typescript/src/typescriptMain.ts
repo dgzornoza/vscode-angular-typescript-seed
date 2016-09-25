@@ -16,7 +16,7 @@ import { env, languages, commands, workspace, window, Uri, ExtensionContext, Mem
 import * as nls from 'vscode-nls';
 nls.config({locale: env.language});
 
-import * as path from 'path';
+import * as path from "path";
 
 import * as Proto from './protocol';
 
@@ -40,6 +40,10 @@ import WorkspaceSymbolProvider from './features/workspaceSymbolProvider';
 import * as VersionStatus from './utils/versionStatus';
 import * as ProjectStatus from './utils/projectStatus';
 import * as BuildStatus from './utils/buildStatus';
+
+interface Map<V> {
+	[key: string]: V;
+}
 
 interface LanguageDescription {
 	id: string;
@@ -67,7 +71,7 @@ export function activate(context: ExtensionContext): void {
 			modeIds: [MODE_ID_JS, MODE_ID_JSX],
 			extensions: ['.js', '.jsx']
 		}
-	], context.storagePath, context.globalState);
+	], (context as any).storagePath, context.globalState);
 
 	let client = clientHost.serviceClient;
 

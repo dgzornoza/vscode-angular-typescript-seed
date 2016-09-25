@@ -14,8 +14,14 @@
 		"vscode-extension-telemetry": "^0.0.5",
 		"vscode-nls": "^2.0.1"
 	},
+    "devDependencies": {
+        "gulp": "^3.9.1",
+        "typescript": "^2.0.3",
+        "gulp-typescript": "^3.0.1"
+    },
 	"scripts": {
-		"vscode:prepublish": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.js compile-extension:typescript ./tsconfig.json",
+        "build": "gulp build",
+		"vscode:prepublish": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ./gulpfile.extensions.js compile-extension:typescript ./tsconfig.json",
 		"update-grammars": "node ./build/update-grammars.js"
 	},
 	"activationEvents": [

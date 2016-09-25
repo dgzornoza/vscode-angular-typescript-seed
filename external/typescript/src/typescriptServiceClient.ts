@@ -327,7 +327,7 @@ export default class TypeScriptServiceClient implements ITypescriptServiceClient
 								title: localize('close', 'Close'),
 								id: MessageAction.close,
 								isCloseAffordance: true
-							}
+							} as any
 						).then((selected) => {
 							if (!selected || selected.id === MessageAction.close) {
 								return modulePath;
@@ -335,17 +335,17 @@ export default class TypeScriptServiceClient implements ITypescriptServiceClient
 							switch(selected.id) {
 								case MessageAction.useLocal:
 									let pathValue = './node_modules/typescript/lib';
-									tsConfig.update('tsdk', pathValue, false);
+									(tsConfig as any).update('tsdk', pathValue, false);
 									window.showInformationMessage(localize('updatedtsdk', 'Updated workspace setting \'typescript.tsdk\' to {0}', pathValue));
 									showVersionStatusItem = true;
 									return localModulePath;
 								case MessageAction.useBundled:
-									tsConfig.update(checkWorkspaceVersionKey, false, false);
+									(tsConfig as any).update(checkWorkspaceVersionKey, false, false);
 									window.showInformationMessage(localize('updateLocalWorkspaceCheck', 'Updated workspace setting \'typescript.check.workspaceVersion\' to false'));
 									return modulePath;
 								case MessageAction.neverCheckLocalVersion:
 									window.showInformationMessage(localize('updateGlobalWorkspaceCheck', 'Updated user setting \'typescript.check.workspaceVersion\' to false'));
-									tsConfig.update(checkWorkspaceVersionKey, false, true);
+									(tsConfig as any).update(checkWorkspaceVersionKey, false, true);
 									return modulePath;
 								default:
 									return modulePath;
@@ -383,7 +383,7 @@ export default class TypeScriptServiceClient implements ITypescriptServiceClient
 			const globalStateValue = this.globalState.get(doGlobalVersionCheckKey, true);
 			const checkTscVersion = 'check.tscVersion';
 			if (!globalStateValue) {
-				tsConfig.update(checkTscVersion, false, true);
+				(tsConfig as any).update(checkTscVersion, false, true);
 				this.globalState.update(doGlobalVersionCheckKey, true);
 			}
 			if (checkGlobalVersion && tsConfig.get(checkTscVersion)) {
@@ -413,7 +413,7 @@ export default class TypeScriptServiceClient implements ITypescriptServiceClient
 							title: localize('close', 'Close'),
 							id: 3,
 							isCloseAffordance: true
-						}
+						} as any
 					).then((selected) => {
 						if (!selected || selected.id === 3) {
 							return;
@@ -423,7 +423,7 @@ export default class TypeScriptServiceClient implements ITypescriptServiceClient
 								openUrl('http://go.microsoft.com/fwlink/?LinkId=826239');
 								break;
 							case 2:
-								tsConfig.update(checkTscVersion, false, true);
+								(tsConfig as any).update(checkTscVersion, false, true);
 								window.showInformationMessage(localize('updateTscCheck', 'Updated user setting \'typescript.check.tscVersion\' to false'));
 								this.globalState.update(doGlobalVersionCheckKey, false);
 								break;

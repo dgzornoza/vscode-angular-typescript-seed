@@ -11,6 +11,10 @@ import * as Proto from '../protocol';
 import { ITypescriptServiceClient, APIVersion } from '../typescriptService';
 import { Delayer } from '../utils/async';
 
+interface Map<V> {
+	[key: string]: V;
+}
+
 interface IDiagnosticRequestor {
 	requestDiagnostic(filepath: string): void;
 }
