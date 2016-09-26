@@ -246,7 +246,8 @@ export default class TypeScriptServiceClient implements ITypescriptServiceClient
 		if (this._packageInfo !== undefined) {
 			return this._packageInfo;
 		}
-		let packagePath = path.join(__dirname, './../package.json');
+		//let packagePath = path.join(__dirname, './../package.json');
+        let packagePath = path.join(__dirname, '/../../../../external/typescript/package.json');
 		let extensionPackage = require(packagePath);
 		if (extensionPackage) {
 			this._packageInfo = {

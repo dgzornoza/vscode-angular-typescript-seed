@@ -40,8 +40,8 @@ export function create(client: ITypescriptServiceClient, isOpen:(path:string)=>P
 
 	let currentHint: Hint;
 	let item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, Number.MIN_VALUE);
-	item.command = 'js.projectStatus.command';
-	toDispose.push(vscode.commands.registerCommand('js.projectStatus.command', () => {
+	item.command = 'js.atse.projectStatus.command';
+	toDispose.push(vscode.commands.registerCommand('js.atse.projectStatus.command', () => {
 		let {message, options} = currentHint;
 		return vscode.window.showInformationMessage(message, ...options).then(selection => {
 			if (selection) {
