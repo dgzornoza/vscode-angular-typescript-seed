@@ -11,6 +11,7 @@ import { ProvidersManager } from "./providers/providersManager";
 import { HtmlTypescriptCompletionItemProvider } from "./providers/htmlTypescriptCompletionItem.provider";
 
 import { ViewsControllersService } from "./services/viewController.service";
+import { TypescriptLanguageService } from "./services/typescriptLanguage.service";
 
 
 /** Class for configure IOC + DI from inversify library
@@ -46,7 +47,8 @@ export class InversifyConfig {
         // Services
         InversifyConfig._kernel.bind<ViewsControllersService>("ViewsControllersService")
             .to(ViewsControllersService).inSingletonScope().onActivation(InversifyConfig._subscribe);
-
+        InversifyConfig._kernel.bind<TypescriptLanguageService>("TypescriptLanguageService")
+            .to(TypescriptLanguageService).inSingletonScope().onActivation(InversifyConfig._subscribe);
     }
 
     public static get Kernel(): inversify.interfaces.Kernel {
