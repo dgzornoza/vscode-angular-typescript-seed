@@ -8,14 +8,7 @@ import "reflect-metadata";
 import { Disposable } from "./../models/disposable";
 import { ViewsControllersService } from "./../services/viewController.service";
 import { TypescriptLanguageService } from "./../services/typescriptLanguage.service";
-
-const TS_TYPE_INFO_OPTIONS: ts.CompilerOptions = {
-        module: ts.ModuleKind.AMD,
-        moduleResolution: ts.ModuleResolutionKind.Classic,
-        noEmitOnError: true,
-        noImplicitAny: true,
-        target: ts.ScriptTarget.ES5
-};
+import { ITypescriptClassEntry, ITypescriptSimbolEntry, ITypescriptSignatureEntry, ITypescriptEntry } from "./../models/interfaces/typescriptLanguage";
 
 /** Provider for typescript completion in html view files, completion is in controller scope related */
 @injectable()
@@ -24,6 +17,7 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
     private _viewsControllersService: ViewsControllersService;
     private _typescriptLanguageService: TypescriptLanguageService;
     private _currentControllerRouteAlias: string;
+    private _currentControllerClassDefinition: ITypescriptClassEntry;
 
     constructor(@inject("ViewsControllersService") viewsControllersService: ViewsControllersService,
                 @inject("TypescriptLanguageService") typescriptLanguageService: TypescriptLanguageService) {
@@ -55,7 +49,7 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
 
         return new Promise((resolve: (value: vsc.CompletionItem[]) => void, reject: (reason?: any) => void) => {
 
-            if (true /*this._currentControllerClassDefinition*/) {
+            if (this._currentControllerClassDefinition) {
                 let completionItems: vsc.CompletionItem[];
 
                 // verify use controller alias
@@ -66,33 +60,36 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
                 let completionRegex: RegExp = new RegExp(`[{|{{|"|".*:]\\s*${this._currentControllerRouteAlias}\\.(.*)$`);
                 let match: RegExpExecArray = completionRegex.exec(text);
 
-                // if (undefined != match) {
+                if (undefined != match) {
 
-                //     // search trasversal members
-                //     if (match[1]) {
-                //         let objectNames: string[] = match[1].slice(0, -1).split(".");
-                //         for (let objectName of objectNames) {
+                    // search trasversal members
+                    if (match[1]) {
 
-                //             let currentObject: MemberDefinition = this._getClassPublicMembers(this._currentControllerClassDefinition)
-                //                 .find((member: MemberDefinition): boolean => {
-                //                     return member.name === objectName;
-                //                 });
+                        // TODO: falta implementar
 
-                //             // property
-                //             if ((currentObject as TsTypeInfo.ClassPropertyDefinition).isAccessor) {
-                //                 let a = (currentObject as TsTypeInfo.ClassPropertyDefinition).type.definitions;
-                //                 let b = 5;
-                //             }
-                //         }
+                        // let objectNames: string[] = match[1].slice(0, -1).split(".");
+                        // for (let objectName of objectNames) {
 
-                //     // controller members
-                //     } else {
-                //         // loop class memembers for set in intellisense
-                //         completionItems = this._getClassPublicMembers(this._currentControllerClassDefinition).map((item: MemberDefinition) => {
-                //             return this._createCompletionItem(item);
-                //         });
-                //     }
-                // }
+                        //     let currentObject: MemberDefinition = this._getClassPublicMembers(this._currentControllerClassDefinition)
+                        //         .find((member: MemberDefinition): boolean => {
+                        //             return member.name === objectName;
+                        //         });
+
+                        //     // property
+                        //     if ((currentObject as TsTypeInfo.ClassPropertyDefinition).isAccessor) {
+                        //         let a = (currentObject as TsTypeInfo.ClassPropertyDefinition).type.definitions;
+                        //         let b = 5;
+                        //     }
+                        // }
+
+                    // controller members
+                    } else {
+                        // loop class memembers for set in intellisense
+                        completionItems = this._getClassPublicEntries(this._currentControllerClassDefinition).map((item: ITypescriptEntry) => {
+                            return this._createCompletionItem(item);
+                        });
+                    }
+                }
 
                 resolve(completionItems);
             }
@@ -132,61 +129,57 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
 
                     // get controller class info for intellisense
                     let controllerClassName: string = this._viewsControllersService.getControllerClassNameFromPath(controllerPath);
-                    this._typescriptLanguageService.generateDocumentation([controllerPath], "", TS_TYPE_INFO_OPTIONS);
-
-                    //let tsInfo: TsTypeInfo.GlobalDefinition = TsTypeInfo.getInfoFromFiles([controllerPath], TS_TYPE_INFO_OPTIONS);
-                    //this._currentControllerClassDefinition = tsInfo.getFile(controllerPath.split("\\").pop()).getClass(controllerClassName);
+                    this._currentControllerClassDefinition = this._typescriptLanguageService.getDefinition(controllerPath, controllerClassName);
 
                 } else {
-                    //this._currentControllerClassDefinition = undefined;
+                    this._currentControllerClassDefinition = undefined;
                 }
             });
         }
     }
 
-    // private _getClassPublicMembers(classDefinition: TsTypeInfo.ClassDefinition): MemberDefinition[] {
+    private _getClassPublicEntries(classDefinition: ITypescriptClassEntry): ITypescriptEntry[] {
 
-    //     let result: MemberDefinition[] = [];
+        let result: ITypescriptEntry[] = [];
 
-    //     // concat methods, properties and statics
-    //     result = result.concat(classDefinition.methods)
-    //         .concat(classDefinition.properties)
-    //         .concat(classDefinition.staticMethods)
-    //         .concat(classDefinition.staticProperties);
+        // concat methods and properties
+        result = result.concat(classDefinition.Methods).concat(classDefinition.Properties);
 
-    //     // filter public
-    //     result = result.filter((value: TsTypeInfo.ClassMethodDefinition) => {
-    //         return value.scope === "public";
-    //     });
+        // filter public
+        result = result.filter((value: ITypescriptEntry) => {
+            /* tslint:disable no-bitwise */
+            return (value.Flag & ts.NodeFlags.Public) === ts.NodeFlags.Public;
+            /* tslint:enable no-bitwise */
+        });
 
-    //     return result;
-    // }
+        return result;
+    }
 
-    // private _getTypedPublicMembers(typedDefinition: TsTypeInfo.TypedDefinition[]): MemberDefinition[] {
+    private _createCompletionItem(definition: ITypescriptSimbolEntry): vsc.CompletionItem {
 
-    //     let result: MemberDefinition[] = [];
+        let completionItem: vsc.CompletionItem = new vsc.CompletionItem("id");
+        completionItem.filterText = definition.Name;
+        completionItem.insertText = definition.Name;
+        completionItem.label = definition.Name;
+        completionItem.documentation = definition.Documentation;
+        completionItem.kind = this._convertToVscKind(definition.Kind);
+        return completionItem;
+    }
 
-    //     // concat methods, properties and statics
-    //     result = result.concat(typedDefinition.)
-    //         .concat(classDefinition.properties)
-    //         .concat(classDefinition.staticMethods)
-    //         .concat(classDefinition.staticProperties);
+    private _convertToVscKind(typescriptKind: number): vsc.CompletionItemKind {
 
-    //     // filter public
-    //     result = result.filter((value: TsTypeInfo.ClassMethodDefinition) => {
-    //         return value.scope === "public";
-    //     });
+        switch (typescriptKind) {
+                case ts.SyntaxKind.FunctionDeclaration:
+                case ts.SyntaxKind.MethodDeclaration:
+                    return vsc.CompletionItemKind.Method;
 
-    //     return result;
-    // }
+                // Properties
+                case ts.SyntaxKind.PropertyDeclaration:
+                case ts.SyntaxKind.GetAccessor:
+                case ts.SyntaxKind.SetAccessor:
+                    return vsc.CompletionItemKind.Property;
 
-    // private _createCompletionItem(definition: MemberDefinition): vsc.CompletionItem {
-
-    //     let completionItem: vsc.CompletionItem = new vsc.CompletionItem("id");
-    //     completionItem.filterText = definition.name;
-    //     completionItem.insertText = definition.name;
-    //     completionItem.label = definition.name;
-    //     completionItem.kind = vsc.CompletionItemKind.Method;
-    //     return completionItem;
-    // }
+                default: ;
+        }
+    }
 }
