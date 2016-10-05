@@ -6,19 +6,19 @@ export interface ITypescriptEntry {
     Flag: number;
 }
 
-/** Interface for typescript simbol entry */
+/** Interface for typescript simbol entry (parameters, properties)*/
 export interface ITypescriptSimbolEntry extends ITypescriptEntry {
     Type?: string;
 }
 
-/** Interface for typescript signature entry (call, constructor, property) */
+/** Interface for typescript signature entry (methods, constructor) */
 export interface ITypescriptSignatureEntry extends ITypescriptEntry {
     Parameters?: ITypescriptSimbolEntry[];
     ReturnType?: string;
 }
 
-/** Interface with typescript document entry */
-export interface ITypescriptClassEntry extends ITypescriptSimbolEntry {
+/** Interface with typescript definition entry */
+export interface ITypescriptDefinitionEntry extends ITypescriptSimbolEntry {
     Constructors?: ITypescriptSignatureEntry[];
     Methods?: ITypescriptSignatureEntry[];
     Properties?: ITypescriptSimbolEntry[];

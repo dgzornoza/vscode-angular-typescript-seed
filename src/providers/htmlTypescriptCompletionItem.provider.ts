@@ -8,7 +8,7 @@ import "reflect-metadata";
 import { Disposable } from "./../models/disposable";
 import { ViewsControllersService } from "./../services/viewController.service";
 import { TypescriptLanguageService } from "./../services/typescriptLanguage.service";
-import { ITypescriptClassEntry, ITypescriptSimbolEntry, ITypescriptSignatureEntry, ITypescriptEntry } from "./../models/interfaces/typescriptLanguage";
+import { ITypescriptDefinitionEntry, ITypescriptSimbolEntry, ITypescriptSignatureEntry, ITypescriptEntry } from "./../models/interfaces/typescriptLanguage";
 
 /** Provider for typescript completion in html view files, completion is in controller scope related */
 @injectable()
@@ -17,7 +17,8 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
     private _viewsControllersService: ViewsControllersService;
     private _typescriptLanguageService: TypescriptLanguageService;
     private _currentControllerRouteAlias: string;
-    private _currentControllerClassDefinition: ITypescriptClassEntry;
+    private _currentControllerClassDefinition: ITypescriptDefinitionEntry;
+    private _currentControllerPath: string;
 
     constructor(@inject("ViewsControllersService") viewsControllersService: ViewsControllersService,
                 @inject("TypescriptLanguageService") typescriptLanguageService: TypescriptLanguageService) {
@@ -65,22 +66,19 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
                     // search trasversal members
                     if (match[1]) {
 
-                        // TODO: falta implementar
+                        let objectNames: string[] = match[1].slice(0, -1).split(".");
+                        for (let objectName of objectNames) {
 
-                        // let objectNames: string[] = match[1].slice(0, -1).split(".");
-                        // for (let objectName of objectNames) {
+                            let currentObject: ITypescriptEntry = this._getClassPublicEntries(this._currentControllerClassDefinition)
+                                .find((item: ITypescriptEntry): boolean => {
+                                    return item.Name === objectName;
+                                });
 
-                        //     let currentObject: MemberDefinition = this._getClassPublicMembers(this._currentControllerClassDefinition)
-                        //         .find((member: MemberDefinition): boolean => {
-                        //             return member.name === objectName;
-                        //         });
+                            let a = this._typescriptLanguageService.getDefinition(this._currentControllerPath, (currentObject as any).Type);
 
-                        //     // property
-                        //     if ((currentObject as TsTypeInfo.ClassPropertyDefinition).isAccessor) {
-                        //         let a = (currentObject as TsTypeInfo.ClassPropertyDefinition).type.definitions;
-                        //         let b = 5;
-                        //     }
-                        // }
+                            //let importPath: RegExp = new RegExp(`import\s*{.*IUserModel.*}\s*from\s*["|'](.*)["|']`);
+                            let b = 5;
+                        }
 
                     // controller members
                     } else {
@@ -118,18 +116,18 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
 
             // get controller path
             let normalizedActiveEditorPath: string = path.normalize(vsc.window.activeTextEditor.document.fileName);
-            let controllerPath: string = this._viewsControllersService.getControllerFromViewPath(normalizedActiveEditorPath);
+            this._currentControllerPath = this._viewsControllersService.getControllerFromViewPath(normalizedActiveEditorPath);
 
-            fs.exists(controllerPath, (exists: boolean) => {
+            fs.exists(this._currentControllerPath, (exists: boolean) => {
 
                 if (exists) {
 
                     // store controller route alias
-                    this._currentControllerRouteAlias = this._viewsControllersService.getControllerRouteAlias(controllerPath);
+                    this._currentControllerRouteAlias = this._viewsControllersService.getControllerRouteAlias(this._currentControllerPath);
 
                     // get controller class info for intellisense
-                    let controllerClassName: string = this._viewsControllersService.getControllerClassNameFromPath(controllerPath);
-                    this._currentControllerClassDefinition = this._typescriptLanguageService.getDefinition(controllerPath, controllerClassName);
+                    let controllerClassName: string = this._viewsControllersService.getControllerClassNameFromPath(this._currentControllerPath);
+                    this._currentControllerClassDefinition = this._typescriptLanguageService.getDefinition(this._currentControllerPath, controllerClassName);
 
                 } else {
                     this._currentControllerClassDefinition = undefined;
@@ -138,7 +136,7 @@ export class HtmlTypescriptCompletionItemProvider extends Disposable implements 
         }
     }
 
-    private _getClassPublicEntries(classDefinition: ITypescriptClassEntry): ITypescriptEntry[] {
+    private _getClassPublicEntries(classDefinition: ITypescriptDefinitionEntry): ITypescriptEntry[] {
 
         let result: ITypescriptEntry[] = [];
 

@@ -5,7 +5,7 @@ import { injectable } from "inversify";
 import "reflect-metadata";
 
 import { Disposable } from "./../models/disposable";
-import { ITypescriptClassEntry, ITypescriptSimbolEntry, ITypescriptSignatureEntry } from "./../models/interfaces/typescriptLanguage";
+import { ITypescriptDefinitionEntry, ITypescriptSimbolEntry, ITypescriptSignatureEntry } from "./../models/interfaces/typescriptLanguage";
 
 
 const TS_TYPE_INFO_OPTIONS: ts.CompilerOptions = {
@@ -23,7 +23,7 @@ const TS_TYPE_INFO_OPTIONS: ts.CompilerOptions = {
 export class TypescriptLanguageService extends Disposable {
 
     private _typeChecker: ts.TypeChecker;
-    private _result: ITypescriptClassEntry[];
+    private _result: ITypescriptDefinitionEntry[];
 
     constructor() {
         super();
@@ -32,9 +32,10 @@ export class TypescriptLanguageService extends Disposable {
 
     /** get typescript file class info.
      * @param file typescript file to process
-     * @return array with file clases info
+     * @param definitionName Definition name to get
+     * @return Definition
      */
-    public getDefinition(file: string, definitionName: string ): ITypescriptClassEntry {
+    public getDefinition(file: string, definitionName: string): ITypescriptDefinitionEntry {
 
         // Build a program using the set of root file names in fileNames
         let program: ts.Program = ts.createProgram([file], TS_TYPE_INFO_OPTIONS);
@@ -49,20 +50,19 @@ export class TypescriptLanguageService extends Disposable {
         });
 
         if (sourceFile.length === 1) {
-            ts.forEachChild(sourceFile[0], (node: ts.Node) => { this._visit(node); });
+            ts.forEachChild(sourceFile[0], (node: ts.Node) => { this._findDefinition(node, definitionName); });
         }
-
-        this._result = this._result.filter((value: ITypescriptClassEntry, index: number, array: ITypescriptClassEntry[]) => {
-            return value.Name === definitionName;
-        });
 
         return this._result[0];
     }
 
 
 
-    /** visit nodes finding exported classes */
-    private _visit(node: ts.Node): void {
+    /** recursive function for find definition in node
+     * @param node typescript ast node
+     * @param definitionName Definition name to find
+     */
+    private _findDefinition(node: ts.Node, definitionName: string): void {
         // Only consider exported nodes
         if (!this._isNodeExported(node)) {
             return;
@@ -71,15 +71,18 @@ export class TypescriptLanguageService extends Disposable {
         switch (node.kind) {
             case ts.SyntaxKind.ModuleDeclaration:
 
-                // This is a namespace, visit its children
-                ts.forEachChild(node, (_node: ts.Node) => { this._visit(_node); });
+                // This is a namespace, find its children
+                ts.forEachChild(node, (_node: ts.Node) => { this._findDefinition(_node, definitionName); });
                 break;
 
             case ts.SyntaxKind.ClassDeclaration:
 
-                 // This is a top level class, get its symbol
-                let symbol: ts.Symbol = this._typeChecker.getSymbolAtLocation((node as ts.ClassDeclaration).name);
-                this._result.push(this._getClassEntry(symbol));
+                if ((node as ts.ClassDeclaration).name.text === definitionName) {
+                    // This is a top level class, get its symbol
+                    let symbol: ts.Symbol = this._typeChecker.getSymbolAtLocation((node as ts.ClassDeclaration).name);
+                    this._result.push(this._getClassEntry(symbol));
+                }
+
                 break;
 
             default:
@@ -90,10 +93,10 @@ export class TypescriptLanguageService extends Disposable {
 
 
     /** Serialize a class symbol information */
-    private _getClassEntry(symbol: ts.Symbol): ITypescriptClassEntry {
+    private _getClassEntry(symbol: ts.Symbol): ITypescriptDefinitionEntry {
 
         // create class entry
-        let details: ITypescriptClassEntry = this._getSymbolEntry(symbol);
+        let details: ITypescriptDefinitionEntry = this._getSymbolEntry(symbol);
         details.Methods = [];
         details.Properties = [];
 
