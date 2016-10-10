@@ -4,6 +4,7 @@
     "description": "vscode extension for rapid develop in angular typescript seed",
     "version": "0.0.1",
     "publisher": "dgzornoza",
+    "author": "David Gonzáleez Zornoza",
     "engines": {
         "vscode": "^1.0.0"
     },
@@ -11,13 +12,12 @@
         "Other"
     ],
     "main": "./out/src/extension",
-
     "activationEvents": [
         "onCommand:atse.changeViewController",
         "onLanguage:typescript",
-        "onLanguage:html"
+        "onLanguage:html",
+        "onLanguage:plaintext"
     ],
-
     "contributes": {
         "keybindings": [
             {
@@ -33,20 +33,21 @@
             }
         ]
     },
-
     "scripts": {
         "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
         "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install"
+        "postinstall": "typings install && node ./node_modules/vscode/bin/install"
     },
     "dependencies": {
         "inversify": "^2.0.0-rc.13",
-        "reflect-metadata": "^0.1.8"
+        "reflect-metadata": "^0.1.8",
+        "vscode-languageclient": "^3.0.0-alpha.2"
     },
     "devDependencies": {
+        "@types/node": "^6.0.45",
         "typescript": "^2.0.3",
         "tslint": "^3.15.1",
-        "vscode": "^0.11.0",
+        "vscode": "^1.0.0",
         "inversify-dts": "^3.0.0"
     }
 }

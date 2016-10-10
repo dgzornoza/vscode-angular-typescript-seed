@@ -1,5 +1,5 @@
 import * as vsc from "vscode";
-import { Kernel } from "inversify";
+import * as inversify from "inversify";
 
 import { IDisposable } from "./models/disposable";
 
@@ -12,6 +12,7 @@ import { HtmlTypescriptCompletionItemProvider } from "./providers/htmlTypescript
 
 import { ViewsControllersService } from "./services/viewController.service";
 import { TypescriptLanguageService } from "./services/typescriptLanguage.service";
+import { TypescriptLanguageService2 } from "./services/typescriptLanguage.service2";
 
 
 /** Class for configure IOC + DI from inversify library
@@ -25,7 +26,7 @@ export class InversifyConfig {
     public static initialize(context: vsc.ExtensionContext): void {
 
         InversifyConfig._extensionContext = context;
-        InversifyConfig._kernel = new Kernel();
+        InversifyConfig._kernel = new inversify.Kernel();
 
         // define IOC
         InversifyConfig._kernel.bind<IStatusBar>("IStatusBar").to(StatusBar).inSingletonScope().onActivation(InversifyConfig._subscribe);
@@ -49,6 +50,9 @@ export class InversifyConfig {
             .to(ViewsControllersService).inSingletonScope().onActivation(InversifyConfig._subscribe);
         InversifyConfig._kernel.bind<TypescriptLanguageService>("TypescriptLanguageService")
             .to(TypescriptLanguageService).inSingletonScope().onActivation(InversifyConfig._subscribe);
+        InversifyConfig._kernel.bind<TypescriptLanguageService2>("TypescriptLanguageService2")
+            .to(TypescriptLanguageService2).inSingletonScope().onActivation(InversifyConfig._subscribe);
+
     }
 
     public static get Kernel(): inversify.interfaces.Kernel {
