@@ -28,7 +28,6 @@ export function activate(context: vsc.ExtensionContext): any {
             InversifyConfig.Kernel.get<TypescriptLanguageService2>("TypescriptLanguageService2");
 
         }
-
     });
 
 }

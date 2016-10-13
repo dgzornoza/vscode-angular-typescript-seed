@@ -1,10 +1,11 @@
 import * as vsc from "vscode";
 import * as lc from "vscode-languageclient";
 import * as path from "path";
-import { injectable } from "inversify";
+import { injectable, inject } from "inversify";
 import "reflect-metadata";
 
 import { Disposable } from "./../models/disposable";
+import { ExtensionConfig } from "./../config";
 
 /**
  * service for manage abstract syntax tree (AST) typescript language
@@ -12,9 +13,12 @@ import { Disposable } from "./../models/disposable";
 @injectable()
 export class TypescriptLanguageService2 extends Disposable {
 
+    private _extensionConfig: ExtensionConfig;
 
-    constructor() {
+    constructor(@inject("ExtensionConfig") extensionConfig: ExtensionConfig) {
         super();
+
+        this._extensionConfig = extensionConfig;
 
         this._initialize();
     }
@@ -22,7 +26,7 @@ export class TypescriptLanguageService2 extends Disposable {
     private _initialize(): void {
 
         // The server is implemented in node
-        let serverModule: string = path.join(vsc.workspace.rootPath, "server", "server.js");
+        let serverModule: string = this._extensionConfig.ExtensionContext.asAbsolutePath(path.join("external", "typescript.server", "out", "src", "server.js"));
         // The debug options for the server
         let debugOptions: lc.ForkOptions = { execArgv: ["--nolazy", "--debug=6004"] };
 
@@ -51,6 +55,4 @@ export class TypescriptLanguageService2 extends Disposable {
         this._subscriptions.push(new lc.LanguageClient("Language Server Example", serverOptions, clientOptions).start());
 
     }
-
-
 }

@@ -31,20 +31,32 @@
                 "command": "atse.changeViewController",
                 "title": "Angular-Typescript-Seed: Change view/controller"
             }
-        ]
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Example configuration",
+            "properties": {
+                "languageServerExample.maxNumberOfProblems": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "Controls the maximum number of problems produced by the server."
+                }
+            }
+        }
     },
     "scripts": {
-        "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
-        "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
+        "vscode:prepublish": "tsc -p ./",
+        "compile": "tsc -watch -p ./",
         "postinstall": "typings install && node ./node_modules/vscode/bin/install"
     },
     "dependencies": {
         "inversify": "^2.0.0-rc.13",
         "reflect-metadata": "^0.1.8",
-        "vscode-languageclient": "^3.0.0-alpha.2"
+        "vscode-languageclient": "2.6.0"
     },
     "devDependencies": {
         "@types/node": "^6.0.45",
+        "@types/mocha": "^2.2.32",
         "typescript": "^2.0.3",
         "tslint": "^3.15.1",
         "vscode": "^1.0.0",

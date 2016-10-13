@@ -3,6 +3,8 @@ import * as inversify from "inversify";
 
 import { IDisposable } from "./models/disposable";
 
+import { ExtensionConfig } from "./config";
+
 import { IStatusBar, StatusBar, StatusBarChangeViewItem } from "./components/statusBar.component";
 
 import { ChangeViewControllerCmd } from "./commands/changeViewController.cmd";
@@ -23,12 +25,19 @@ export class InversifyConfig {
     private static _kernel: inversify.interfaces.Kernel;
     private static _extensionContext: vsc.ExtensionContext;
 
-    public static initialize(context: vsc.ExtensionContext): void {
+    public static initialize(extensionContext: vsc.ExtensionContext): void {
 
-        InversifyConfig._extensionContext = context;
+        InversifyConfig._extensionContext = extensionContext;
         InversifyConfig._kernel = new inversify.Kernel();
 
         // define IOC
+
+        // Configuration
+        InversifyConfig._kernel.bind<ExtensionConfig>("ExtensionConfig")
+            .toDynamicValue((context: inversify.interfaces.Context) => { return new ExtensionConfig(extensionContext); })
+            .inSingletonScope().onActivation(InversifyConfig._subscribe);
+
+        // UI
         InversifyConfig._kernel.bind<IStatusBar>("IStatusBar").to(StatusBar).inSingletonScope().onActivation(InversifyConfig._subscribe);
 
         InversifyConfig._kernel.bind<StatusBarChangeViewItem>("StatusBarChangeViewItem")
