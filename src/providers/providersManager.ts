@@ -23,9 +23,10 @@ export class ProvidersManager extends Disposable implements IProvidersManager  {
         this._htmlTypescriptCompletionItemProvider = htmlTypescriptCompletionItemProvider;
 
         // subscribe providers
-        this._subscriptions.push(vsc.languages.registerCompletionItemProvider(this._htmlTypescriptCompletionItemProvider.getProviderDocumentSelector(),
-            this._htmlTypescriptCompletionItemProvider,
-            ...this._htmlTypescriptCompletionItemProvider.getProviderTriggerCharacters()));
+        // this._subscriptions.push(vsc.languages.registerCompletionItemProvider(this._htmlTypescriptCompletionItemProvider.getProviderDocumentSelector(),
+        //     this._htmlTypescriptCompletionItemProvider,
+        //     ...this._htmlTypescriptCompletionItemProvider.getProviderTriggerCharacters()));
+
 
 
     }

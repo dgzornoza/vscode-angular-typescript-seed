@@ -8,6 +8,21 @@ const MAIN_APP_REGEXP: RegExp = /[\s\S]*class AngularApp[\s\S]*\.controllersBase
 const ROUTES_ALIAS_REGEXP: RegExp =
     /controllerAs\s*:\s*"((\\"|[^"])*)".*path\s*:\s*"((\\"|[^"])*)"|path\s*:\s*"((\\"|[^"])*)".*controllerAs\s*:\s*"((\\"|[^"])*)"/g;
 
+
+export class ExtensionConfig {
+
+    private _extensionContext: vsc.ExtensionContext;
+
+    public constructor(context: vsc.ExtensionContext) {
+        this._extensionContext = context;
+    }
+
+    public get ExtensionContext(): vsc.ExtensionContext {
+        return this._extensionContext;
+    }
+}
+
+
 /**
  * Clas with angular-typescript-seed environment vars
  */
@@ -101,7 +116,7 @@ export class SeedEnvironmentConfig {
                             ROUTES_ALIAS_REGEXP.lastIndex++;
                         }
                         routesMatches = ROUTES_ALIAS_REGEXP.exec(data);
-                    } while (routesMatches)
+                    } while (routesMatches);
 
                     return resolve(true);
 

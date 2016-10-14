@@ -7,6 +7,8 @@ import { InversifyConfig } from "./inversify.config";
 import { IStatusBar } from "./components/statusBar.component";
 import { ProvidersManager } from "./providers/providersManager";
 
+import { TypescriptLanguageService2 } from "./services/typescriptLanguage.service2";
+
 // this method is called when extension is activated
 // extension is activated the very first time the command is executed
 export function activate(context: vsc.ExtensionContext): any {
@@ -23,8 +25,9 @@ export function activate(context: vsc.ExtensionContext): any {
             InversifyConfig.initialize(context);
             InversifyConfig.Kernel.get<IStatusBar>("IStatusBar");
             InversifyConfig.Kernel.get<ProvidersManager>("ProvidersManager");
-        }
+            InversifyConfig.Kernel.get<TypescriptLanguageService2>("TypescriptLanguageService2");
 
+        }
     });
 
 }
