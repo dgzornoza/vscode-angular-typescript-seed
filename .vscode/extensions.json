@@ -3,19 +3,19 @@
 	// for the documentation about the extensions.json format
 	"recommendations": [
 		// Extension identifier format: ${publisher}.${name}. Example: vscode.csharp
-        "eg2.tslint",
+        "mrmlnc.vscode-autoprefixer",
+        "alefragnani.Bookmarks",
+        "wmaurer.change-case",
         "msjsdiag.debugger-for-chrome",
         "msjsdiag.debugger-for-edge",
-        "richie5um2.vscode-sort-json",
-        "humao.rest-client",
-        "mrmlnc.vscode-autoprefixer",
-        "benjaminromano.typings-installer",
-        "alefragnani.Bookmarks",
         "EditorConfig.EditorConfig",
+        "GregorBiswanger.json2ts",
         "IBM.output-colorizer",
-        "wmaurer.change-case",
-        "steoates.autoimport",
+        "humao.rest-client",
+        "richie5um2.vscode-sort-json",
         "minhthai.vscode-todo-parser",
-        "DSKWRK.vscode-generate-getter-setter"
+        "eg2.tslint",
+        "benjaminromano.typings-installer"
+
 	]
 }
