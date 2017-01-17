@@ -4,13 +4,16 @@
 	"recommendations": [
 		// Extension identifier format: ${publisher}.${name}. Example: vscode.csharp
         "mrmlnc.vscode-autoprefixer",
+        "HookyQR.beautify",
         "alefragnani.Bookmarks",
         "wmaurer.change-case",
         "msjsdiag.debugger-for-chrome",
         "msjsdiag.debugger-for-edge",
         "EditorConfig.EditorConfig",
+        "lonefy.vscode-JS-CSS-HTML-formatter",
         "GregorBiswanger.json2ts",
         "IBM.output-colorizer",
+        "ms-vscode.PowerShell",
         "humao.rest-client",
         "richie5um2.vscode-sort-json",
         "minhthai.vscode-todo-parser",
